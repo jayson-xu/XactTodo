@@ -16,8 +16,8 @@ namespace XactTodo.Domain.AggregatesModel.TeamAggregate
 
         public int UserId { get; set; }
 
-        //[ForeignKey(nameof(UserId))]
-        //public virtual User User { get; set; }
+        [ForeignKey(nameof(UserId))]
+        public virtual User User { get; set; }
 
         /// <summary>
         /// 是否管理者

@@ -14,8 +14,40 @@ namespace XactTodo.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.2-rtm-30932")
+                .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("XactTodo.Domain.AggregatesModel.IdentityAggregate.Identity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("AccessToken")
+                        .HasMaxLength(32);
+
+                    b.Property<int>("ExpiresIn");
+
+                    b.Property<bool>("Invalid");
+
+                    b.Property<DateTime>("IssueTime");
+
+                    b.Property<string>("Nickname")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.Property<string>("RefreshToken")
+                        .HasMaxLength(32);
+
+                    b.Property<int>("UserId");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Identity");
+                });
 
             modelBuilder.Entity("XactTodo.Domain.AggregatesModel.MatterAggregate.Evolvement", b =>
                 {
@@ -50,6 +82,9 @@ namespace XactTodo.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("CameFrom")
+                        .HasMaxLength(50);
 
                     b.Property<string>("Content")
                         .IsRequired();
@@ -128,9 +163,10 @@ namespace XactTodo.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MatterId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("MatterId", "UserId", "Tag")
+                        .IsUnique();
 
                     b.ToTable("MatterTag");
                 });
@@ -166,9 +202,11 @@ namespace XactTodo.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TeamId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("TeamId", "UserId")
+                        .IsUnique()
+                        .HasFilter("IsDeleted=0");
 
                     b.ToTable("Member");
                 });
@@ -210,6 +248,10 @@ namespace XactTodo.Infrastructure.Migrations
                     b.HasIndex("CreatorUserId");
 
                     b.HasIndex("LeaderId");
+
+                    b.HasIndex("Name", "CreatorUserId")
+                        .IsUnique()
+                        .HasFilter("IsDeleted=0");
 
                     b.ToTable("Team");
                 });
@@ -259,10 +301,12 @@ namespace XactTodo.Infrastructure.Migrations
                     b.HasIndex("CreatorUserId");
 
                     b.HasIndex("Email")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("IsDeleted=0");
 
                     b.HasIndex("UserName")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("IsDeleted=0");
 
                     b.ToTable("User");
                 });
@@ -296,9 +340,12 @@ namespace XactTodo.Infrastructure.Migrations
                         {
                             b1.Property<int>("MatterId");
 
-                            b1.Property<decimal>("Num");
+                            b1.Property<decimal>("Num")
+                                .HasColumnType("decimal(9,1)");
 
                             b1.Property<int>("Unit");
+
+                            b1.HasKey("MatterId");
 
                             b1.ToTable("Matter.EstimatedTimeRequired#PeriodOfTime");
 
@@ -312,9 +359,12 @@ namespace XactTodo.Infrastructure.Migrations
                         {
                             b1.Property<int>("MatterId");
 
-                            b1.Property<decimal>("Num");
+                            b1.Property<decimal>("Num")
+                                .HasColumnType("decimal(9,1)");
 
                             b1.Property<int>("Unit");
+
+                            b1.HasKey("MatterId");
 
                             b1.ToTable("Matter.IntervalPeriod#PeriodOfTime");
 
@@ -343,9 +393,9 @@ namespace XactTodo.Infrastructure.Migrations
                     b.HasOne("XactTodo.Domain.AggregatesModel.TeamAggregate.Team")
                         .WithMany("Members")
                         .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("XactTodo.Domain.AggregatesModel.UserAggregate.User")
+                    b.HasOne("XactTodo.Domain.AggregatesModel.UserAggregate.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);

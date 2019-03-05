@@ -29,9 +29,20 @@ namespace XactTodo.Api.DTO
         public string Content { get; set; }
 
         /// <summary>
+        /// Tags
+        /// </summary>
+        public string Tags { get; set; }
+
+        /// <summary>
         /// 负责人Id
         /// </summary>
         public int? ExecutantId { get; set; }
+
+        /// <summary>
+        /// 事项来源
+        /// </summary>
+        [StringLength(Matter.MaxCameFromLength)]
+        public string CameFrom { get; set; }
 
         /// <summary>
         /// 密码
@@ -51,9 +62,14 @@ namespace XactTodo.Api.DTO
         public Importance Importance { get; set; }
 
         /// <summary>
-        /// 预计需时
+        /// 预计需时(数值)
         /// </summary>
-        public PeriodOfTime EstimatedTimeRequired { get; set; }
+        public decimal EstimatedTimeRequired_Num { get; set; }
+
+        /// <summary>
+        /// 预计需时(单位)
+        /// </summary>
+        public TimeUnit EstimatedTimeRequired_Unit { get; set; }
 
         /// <summary>
         /// 最后期限
@@ -76,9 +92,14 @@ namespace XactTodo.Api.DTO
         public bool Periodic { get; set; }
 
         /// <summary>
-        /// 间隔周期
+        /// 间隔周期(数值)
         /// </summary>
-        public PeriodOfTime IntervalPeriod { get; set; }
+        public decimal IntervalPeriod_Num { get; set; }
+
+        /// <summary>
+        /// 间隔周期(单位)
+        /// </summary>
+        public TimeUnit IntervalPeriod_Unit { get; set; }
 
         /// <summary>
         /// 备注

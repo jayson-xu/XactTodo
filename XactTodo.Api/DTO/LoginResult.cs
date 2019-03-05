@@ -1,0 +1,131 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using XactTodo.Domain;
+using XactTodo.Domain.AggregatesModel.IdentityAggregate;
+
+namespace XactTodo.Api.DTO
+{
+    /// <summary>
+    /// 登录结果
+    /// </summary>
+    public class LoginResult
+    {
+        /// <summary>
+        /// 结果类型<see cref="LoginResultType"/> 
+        /// </summary>
+        public LoginResultType ResultType { get; set; }
+
+        /// <summary>
+        /// 登录或验证失败时，可通过此属性向前台反馈更明确的错误信息
+        /// </summary>
+        public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// 机构ID
+        /// </summary>
+        public int? OrganId { get; set; }
+
+        /// <summary>
+        /// 机构编码
+        /// </summary>
+        public string OrganCode { get; set; }
+
+        /// <summary>
+        /// 机构名称
+        /// </summary>
+        public string OrganName { get; set; }
+
+        /*// <summary>
+        /// 机构类型(Corporation:公司 Fictitious:虚拟机构 Department:部门 Project:项目)
+        /// </summary>
+        public String OrganType { get; set; }
+        */
+
+        /// <summary>
+        /// 用户ID
+        /// </summary>
+        public int UserId { get; set; }
+
+        /// <summary>
+        /// 用户账号
+        /// </summary>
+        public string UserName { get; set; }
+
+        /// <summary>
+        /// 用户姓名
+        /// </summary>
+        public string RealName { get; set; }
+
+        /// <summary>
+        /// 令牌
+        /// </summary>
+        public Token Token { get; set; }
+
+        /// <summary>
+        /// 无参构造函数
+        /// </summary>
+        public LoginResult() { }
+
+        /// <summary>
+        /// 以指定登录结果类型构造实例
+        /// </summary>
+        /// <param name="resultType">登录结果类型</param>
+        /// <param name="errorMessage">详细错误信息</param>
+        public LoginResult(LoginResultType resultType, string errorMessage = null)
+        {
+            ResultType = resultType;
+            ErrorMessage = errorMessage;
+        }
+
+        public static LoginResult FromIdentity(Identity identity)
+        {
+            throw new NotImplementedException();
+        }
+
+    }
+
+    /// <summary>
+    /// 登录结果类型
+    /// </summary>
+    public enum LoginResultType : byte
+    {
+        /// <summary>
+        /// 登录成功
+        /// </summary>
+        Success = 1,
+
+        /// <summary>
+        /// 错误的用户名
+        /// </summary>
+        InvalidUserName,
+
+        /// <summary>
+        /// 密码错误
+        /// </summary>
+        InvalidPassword,
+
+        /// <summary>
+        /// 必须重设密码
+        /// </summary>
+        PasswordMustReset,
+
+        /// <summary>
+        /// 账号未激活
+        /// </summary>
+        UserIsNotActive,
+
+        /// <summary>
+        /// 用户邮件地址未验证，只能使用账号登录
+        /// </summary>
+        UserEmailIsNotConfirmed,
+
+        /// <summary>
+        /// 未知错误
+        /// </summary>
+        UnkownError = 255,
+
+    }
+
+}

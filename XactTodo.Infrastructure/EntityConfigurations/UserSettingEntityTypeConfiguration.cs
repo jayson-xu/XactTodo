@@ -14,7 +14,7 @@ namespace XactTodo.Infrastructure.EntityConfigurations
         public void Configure(EntityTypeBuilder<UserSetting> builder)
         {
             //builder.Ignore(b => b.DomainEvents);
-            builder.Property(p=>p.Id).ValueGeneratedNever(); //设置主键不自动增长
+            builder.Property(p=>p.Id).ValueGeneratedNever(); //设置主键不自动增长，以便指定用户ID值为主键值
         }
     }
 }

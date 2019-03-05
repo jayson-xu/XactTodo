@@ -15,13 +15,13 @@ namespace XactTodo.Infrastructure.EntityConfigurations
     {
         public void Configure(EntityTypeBuilder<MatterTag> builder)
         {
+            builder.HasIndex(p => new { p.MatterId, p.UserId, p.Tag }).IsUnique();
             //builder.Ignore(b => b.DomainEvents);
             builder.HasOne<User>()
                 .WithMany()
                 .IsRequired()
                 .HasForeignKey(nameof(MatterTag.UserId))
                 .OnDelete(DeleteBehavior.Restrict); //不级联删除
-
 
             builder.HasOne<Matter>()
                 .WithMany()

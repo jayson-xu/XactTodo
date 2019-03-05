@@ -21,9 +21,9 @@ namespace XactTodo.Infrastructure.Repositories
 
         public IUnitOfWork UnitOfWork => context;
 
-        public Matter Add(Matter matter)
+        public void Add(Matter matter)
         {
-            return context.Matters.Add(matter).Entity;
+            context.Matters.Add(matter);
         }
 
         public void Update(Matter matter)
@@ -37,6 +37,11 @@ namespace XactTodo.Infrastructure.Repositories
             if (matter == null)
                 throw new KeyNotFoundException($"not found a Matter via Id:{id}");
             context.Remove(matter);
+        }
+
+        public Matter FindById(int id)
+        {
+            return context.Matters.Find(id);
         }
 
         public IEnumerable<Matter> Find(Expression<Func<Matter, bool>> expression)
@@ -54,8 +59,8 @@ namespace XactTodo.Infrastructure.Repositories
             {
                 await context.Entry(matter)
                     .Collection(i => i.Evolvements).LoadAsync();
-                await context.Entry(matter)
-                    .Reference(i => i.EstimatedTimeRequired).LoadAsync();
+                await context.Entry(matter).Reference(i => i.EstimatedTimeRequired).LoadAsync();
+                await context.Entry(matter).Reference(i => i.IntervalPeriod).LoadAsync();
             }
             return matter;
         }
@@ -64,6 +69,5 @@ namespace XactTodo.Infrastructure.Repositories
         {
             return context.Matters.AsQueryable();
         }
-
     }
 }

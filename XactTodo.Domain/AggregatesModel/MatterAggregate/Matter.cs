@@ -11,6 +11,7 @@ namespace XactTodo.Domain.AggregatesModel.MatterAggregate
         private const int MaxPasswordLength = 128;
         public const int MaxSubjectLength = 200;
         public const int MaxRemarkLength = 500;
+        public const int MaxCameFromLength = 50;
 
         [Required]
         [StringLength(MaxSubjectLength)]
@@ -23,6 +24,12 @@ namespace XactTodo.Domain.AggregatesModel.MatterAggregate
         /// 负责人Id
         /// </summary>
         public int? ExecutantId { get; set; }
+
+        /// <summary>
+        /// 事项来源
+        /// </summary>
+        [StringLength(MaxCameFromLength)]
+        public string CameFrom { get; set; }
 
         /// <summary>
         /// 密码
@@ -58,16 +65,22 @@ namespace XactTodo.Domain.AggregatesModel.MatterAggregate
         /// </summary>
         public int? TeamId { get; set; }
 
-        public ICollection<Evolvement> Evolvements { get; set; }
+        public ICollection<Evolvement> Evolvements { get; set; } = new List<Evolvement>();
 
         //public IEnumerable<Attachment> Attachments { get; set; }
 
-        public bool SetFinished(bool finished)
+        public bool SetFinished(bool finished, string comment, ICustomSession session)
         {
             if (this.Finished == finished)
                 return false;
             this.Finished = finished;
             this.FinishTime = finished ? DateTime.Now : (DateTime?)null;
+            this.Evolvements.Add(new Evolvement
+            {
+                Comment = (finished ? "事项完成" : "重启事项") + (string.IsNullOrWhiteSpace(comment) ? "" : "：")
+                + $"{comment} by {session.NickName}({session.UserName})",
+                MatterId = this.Id,
+            });
             return true;
         }
     }

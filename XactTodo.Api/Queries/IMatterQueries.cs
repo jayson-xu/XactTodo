@@ -5,9 +5,12 @@ using System.Threading.Tasks;
 
 namespace XactTodo.Api.Queries
 {
-    public interface IMatterQueries
+    /// <summary>
+    /// 事项查询接口
+    /// </summary>
+    public interface IMatterQueries : IQueries
     {
-        Task<Matter> GetMatterAsync(int id);
+        Task<Matter> GetAsync(int id);
 
         Task<IEnumerable<UnfinishedMatterOutline>> GetUnfinishedMatterAsync(int userId);
 

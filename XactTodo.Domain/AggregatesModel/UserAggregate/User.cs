@@ -46,7 +46,8 @@ namespace XactTodo.Domain.AggregatesModel.UserAggregate
 
         public bool ValidatePassword(string password)
         {
-            return Hasher.VerifyHashedPassword(this.Password, password);
+            return (string.IsNullOrEmpty(this.Password) && string.IsNullOrEmpty(password))
+                || Hasher.VerifyHashedPassword(this.Password, password);
         }
 
         public bool ChangePassword(string password, string newPassword)

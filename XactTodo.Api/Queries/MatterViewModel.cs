@@ -11,6 +11,11 @@ namespace XactTodo.Api.Queries
     public class Matter
     {
         /// <summary>
+        /// 主键
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
         /// 主题
         /// </summary>
         public string Subject { get; private set; }
@@ -19,6 +24,16 @@ namespace XactTodo.Api.Queries
         /// 内容
         /// </summary>
         public string Content { get; private set; }
+
+        /// <summary>
+        /// 负责人Id
+        /// </summary>
+        public string Executant { get; set; }
+
+        /// <summary>
+        /// 事项来源
+        /// </summary>
+        public string CameFrom { get; set; }
 
         /// <summary>
         /// 重要性
@@ -77,7 +92,7 @@ namespace XactTodo.Api.Queries
         /// <summary>
         /// 间隔周期 单位(枚举)
         /// </summary>
-        public decimal IntervalPeriod_Unit { get; private set; }
+        public int IntervalPeriod_Unit { get; private set; }
 
         /// <summary>
         /// 间隔周期描述
@@ -172,6 +187,11 @@ namespace XactTodo.Api.Queries
     /// </summary>
     public class UnfinishedMatterOutline
     {
+        /// <summary>
+        /// 主键
+        /// </summary>
+        public int Id { get; set; }
+
         /// <summary>
         /// 主题
         /// </summary>

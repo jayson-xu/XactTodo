@@ -15,8 +15,8 @@ namespace XactTodo.Infrastructure.EntityConfigurations
         public void Configure(EntityTypeBuilder<Matter> builder)
         {
             //builder.Ignore(b => b.DomainEvents);
-            builder.OwnsOne(o => o.EstimatedTimeRequired);
-            builder.OwnsOne(o => o.IntervalPeriod);
+            builder.OwnsOne(o => o.EstimatedTimeRequired).Property(p=>p.Num).HasColumnType("decimal(9,1)");
+            builder.OwnsOne(o => o.IntervalPeriod).Property(p=>p.Num).HasColumnType("decimal(9,1)");
             builder.HasIndex(p => p.Subject);
             builder.HasIndex(p => p.Importance);
             builder.HasIndex(p => p.Deadline);

@@ -17,9 +17,16 @@ namespace XactTodo.Api.Queries
             _connectionString = !string.IsNullOrWhiteSpace(constr) ? constr : throw new ArgumentNullException(nameof(constr));
         }
 
-        public async Task<Matter> GetMatterAsync(int id)
+        public async Task<Matter> GetAsync(int id)
         {
-            const string sql = @"";
+            const string sql = @"SELECT M.Id, `Subject`, Content, M.`Password`, ExecutantId, CameFrom, RelatedMatterId, Importance, Deadline, Finished, FinishTime, Remark, TeamId, 
+E.Num EstimatedTimeRequired_Num, E.Unit EstimatedTimeRequired_Unit, M.Periodic, I.Num IntervalPeriod_Num, I.Unit IntervalPeriod_Unit,
+M.CreationTime, M.CreatorUserId, U.DisplayName Creator
+  FROM Matter M
+  LEFT JOIN `Matter.EstimatedTimeRequired#PeriodOfTime` E on E.MatterId=M.Id
+  LEFT JOIN `Matter.IntervalPeriod#PeriodOfTime` I on I.MatterId=M.Id
+  JOIN `User` U ON M.CreatorUserId=U.Id
+  WHERE M.IsDeleted=0 AND M.Id=@id";
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();

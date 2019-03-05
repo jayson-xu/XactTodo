@@ -14,6 +14,7 @@ namespace XactTodo.Infrastructure.EntityConfigurations
         public void Configure(EntityTypeBuilder<Team> builder)
         {
             //builder.Ignore(b => b.DomainEvents);
+            builder.HasIndex(p =>new { p.Name, p.CreatorUserId }).IsUnique().HasFilter("IsDeleted=0");
             var navigation = builder.Metadata.FindNavigation(nameof(Team.Members));
             navigation.SetPropertyAccessMode(PropertyAccessMode.Field);
 

@@ -16,12 +16,14 @@ using XactTodo.Domain.AggregatesModel.UserAggregate;
 using XactTodo.Domain.SeedWork;
 using XactTodo.Infrastructure.Extensions;
 using XactTodo.Infrastructure.EntityConfigurations;
+using XactTodo.Domain.AggregatesModel.IdentityAggregate;
 
 namespace XactTodo.Infrastructure
 {
     public class TodoContext : DbContext, IUnitOfWork
     {
         private const string column_IsDeleted = "IsDeleted";
+
         public ICustomSession Session { get; }
 
         public int InstanceId { get; }
@@ -31,6 +33,7 @@ namespace XactTodo.Infrastructure
             Session = session;
         }
 
+        public DbSet<Identity> Identities {get;set;}
         public DbSet<User> Users { get; set; }
         public DbSet<Matter> Matters { get; set; }
         public DbSet<MatterTag> MatterTags { get; set; }
@@ -47,7 +50,16 @@ namespace XactTodo.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            //将所有decimal类型的字段都默认设置为decimal(18,2)，通过后面的ApplyConfiguration()方法可个别再调整
+            //但是需要留意：值对象对应的字段配置不了，因为那已经是实体类属性的属性了，需要通过EntityTypeBuilder.OwnsOne().Property().HasColumnType()来配置
+            foreach (var pb in modelBuilder.Model
+                .GetEntityTypes()
+                .SelectMany(t => t.GetProperties())
+                .Where(p => p.ClrType == typeof(decimal))
+                .Select(p => modelBuilder.Entity(p.DeclaringEntityType.ClrType).Property(p.Name)))
+            {
+                pb.HasColumnType("decimal(18,2)");
+            }
 
             modelBuilder.ApplyConfiguration(new MatterEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new EvolvementEntityTypeConfiguration());
@@ -66,6 +78,8 @@ namespace XactTodo.Infrastructure
                     ConfigEntityProperty(modelBuilder, typeEntity);
                 }
             }
+
+            base.OnModelCreating(modelBuilder);
         }
 
         private void ConfigEntityProperty(ModelBuilder modelBuilder, Type typeEntity)
@@ -166,6 +180,7 @@ namespace XactTodo.Infrastructure
         {
             var optionsBuilder = new DbContextOptionsBuilder<TodoContext>();
             optionsBuilder.UseMySql("server=git.csci.com.hk;userid=root;pwd=123456;port=3306;database=XactTodo;");
+            //optionsBuilder.UseMySql("server=10.1.17.201;userid=root;pwd=123456;port=3306;database=XactTodo;");
 
             return new TodoContext(optionsBuilder.Options, null);
         }

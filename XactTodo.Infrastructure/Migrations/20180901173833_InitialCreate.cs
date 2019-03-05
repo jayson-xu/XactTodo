@@ -140,7 +140,7 @@ namespace XactTodo.Infrastructure.Migrations
                         column: x => x.TeamId,
                         principalTable: "Team",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Member_User_UserId",
                         column: x => x.UserId,
@@ -182,7 +182,7 @@ namespace XactTodo.Infrastructure.Migrations
                 name: "Matter.EstimatedTimeRequired#PeriodOfTime",
                 columns: table => new
                 {
-                    Num = table.Column<decimal>(nullable: false),
+                    Num = table.Column<decimal>(type: "decimal(9,1)", nullable: false),
                     Unit = table.Column<int>(nullable: false),
                     MatterId = table.Column<int>(nullable: false)
                 },
@@ -201,7 +201,7 @@ namespace XactTodo.Infrastructure.Migrations
                 name: "Matter.IntervalPeriod#PeriodOfTime",
                 columns: table => new
                 {
-                    Num = table.Column<decimal>(nullable: false),
+                    Num = table.Column<decimal>(type: "decimal(9,1)", nullable: false),
                     Unit = table.Column<int>(nullable: false),
                     MatterId = table.Column<int>(nullable: false)
                 },
@@ -279,24 +279,27 @@ namespace XactTodo.Infrastructure.Migrations
                 column: "TeamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MatterTag_MatterId",
-                table: "MatterTag",
-                column: "MatterId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_MatterTag_UserId",
                 table: "MatterTag",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Member_TeamId",
-                table: "Member",
-                column: "TeamId");
+                name: "IX_MatterTag_MatterId_UserId_Tag",
+                table: "MatterTag",
+                columns: new[] { "MatterId", "UserId", "Tag" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Member_UserId",
                 table: "Member",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Member_TeamId_UserId",
+                table: "Member",
+                columns: new[] { "TeamId", "UserId" },
+                unique: true,
+                filter: "IsDeleted=0");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Team_CreatorUserId",
@@ -309,6 +312,13 @@ namespace XactTodo.Infrastructure.Migrations
                 column: "LeaderId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Team_Name_CreatorUserId",
+                table: "Team",
+                columns: new[] { "Name", "CreatorUserId" },
+                unique: true,
+                filter: "IsDeleted=0");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_User_CreatorUserId",
                 table: "User",
                 column: "CreatorUserId");
@@ -317,13 +327,15 @@ namespace XactTodo.Infrastructure.Migrations
                 name: "IX_User_Email",
                 table: "User",
                 column: "Email",
-                unique: true);
+                unique: true,
+                filter: "IsDeleted=0");
 
             migrationBuilder.CreateIndex(
                 name: "IX_User_UserName",
                 table: "User",
                 column: "UserName",
-                unique: true);
+                unique: true,
+                filter: "IsDeleted=0");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

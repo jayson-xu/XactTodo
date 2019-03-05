@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using XactTodo.Api.DTO;
 using XactTodo.Api.Queries;
 using XactTodo.Domain;
@@ -18,11 +19,17 @@ namespace XactTodo.Api.Controllers
     {
         private const string KEY_AUTHORIZATION = "authorization";
         private readonly ICustomSession session;
+        private readonly ILogger logger;
         private readonly IMatterRepository matterRepository;
         private readonly IMatterQueries matterQueries;
 
-        public MatterController(IMatterRepository matterRepository, IMatterQueries matterQueries, ICustomSession session)
+        public MatterController(
+            ILogger<MatterController> logger,
+            IMatterRepository matterRepository,
+            IMatterQueries matterQueries,
+            ICustomSession session)
         {
+            this.logger = logger;
             this.session = session ?? throw new ArgumentNullException(nameof(session));
             this.matterRepository = matterRepository ?? throw new ArgumentNullException(nameof(matterRepository));
             this.matterQueries = matterQueries ?? throw new ArgumentNullException(nameof(matterQueries)); ;
@@ -41,10 +48,18 @@ namespace XactTodo.Api.Controllers
 
         [Route("importances")]
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<KeyValuePair<int,string>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<KeyValuePair<int, string>>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetImportances()
         {
-            var kvs = GetEnumKeyValues<Importance>();
+            //var kvs = GetEnumKeyValues<Importance>();
+            var kvs = new KeyValuePair<int, string>[]
+            {
+                new KeyValuePair<int, string>((int)Importance.Uncertain, "不确定"),
+                new KeyValuePair<int, string>((int)Importance.Unimportant, "不重要"),
+                new KeyValuePair<int, string>((int)Importance.Normal, "一般"),
+                new KeyValuePair<int, string>((int)Importance.Important, "重要"),
+                new KeyValuePair<int, string>((int)Importance.VeryImportant, "非常重要"),
+            };
             return Ok(kvs);
         }
 
@@ -53,7 +68,14 @@ namespace XactTodo.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<KeyValuePair<int,string>>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetTimeUnits()
         {
-            var kvs = GetEnumKeyValues<TimeUnit>();
+            var kvs = new KeyValuePair<int, string>[]
+            {
+                new KeyValuePair<int, string>((int)TimeUnit.Weekday, "工作日"),
+                new KeyValuePair<int, string>((int)TimeUnit.NaturalDay, "自然日"),
+                new KeyValuePair<int, string>((int)TimeUnit.Week, "周"),
+                new KeyValuePair<int, string>((int)TimeUnit.Month, "月"),
+                new KeyValuePair<int, string>((int)TimeUnit.Year, "年"),
+            };
             return Ok(kvs);
         }
 
@@ -78,7 +100,7 @@ namespace XactTodo.Api.Controllers
         {
             try
             {
-                var matter = await matterRepository.GetAsync(id);
+                var matter = await matterQueries.GetAsync(id);
 
                 return Ok(matter);
             }
@@ -88,10 +110,15 @@ namespace XactTodo.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// 创建新事项
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         //POST api/v1/[controller]/[action]
         //[Route("[action]")]
         [HttpPost]
-        [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.Created)]
         public async Task<IActionResult> Create(MatterInput input)
         {
             var matter = new Domain.AggregatesModel.MatterAggregate.Matter
@@ -99,6 +126,7 @@ namespace XactTodo.Api.Controllers
                 Subject = input.Subject,
                 Content = input.Content,
                 ExecutantId = input.ExecutantId,
+                CameFrom = input.CameFrom,
                 Password = input.Password,
                 RelatedMatterId = input.RelatedMatterId,
                 Importance = input.Importance,
@@ -109,19 +137,25 @@ namespace XactTodo.Api.Controllers
                 Remark = input.Remark,
                 TeamId = input.TeamId
             };
-            if(input.EstimatedTimeRequired!=null && input.EstimatedTimeRequired.Num > 0)
+            if(input.EstimatedTimeRequired_Num > 0)
             {
-                matter.EstimatedTimeRequired = input.EstimatedTimeRequired;
+                matter.EstimatedTimeRequired = new PeriodOfTime(input.EstimatedTimeRequired_Num, input.EstimatedTimeRequired_Unit);
             }
-            if(input.Periodic && input.IntervalPeriod!=null && input.IntervalPeriod.Num>0)
+            if(input.Periodic && input.IntervalPeriod_Num>0)
             {
-                matter.IntervalPeriod = input.IntervalPeriod;
+                matter.IntervalPeriod = new PeriodOfTime(input.IntervalPeriod_Num, input.IntervalPeriod_Unit);
             }
             matterRepository.Add(matter);
             await matterRepository.UnitOfWork.SaveChangesAsync();
             return CreatedAtAction(nameof(GetById), new { id = matter.Id }, matter.Id);
         }
 
+        /// <summary>
+        /// 更新事项
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
         //PUT api/v1/[controller]/{id}
         [HttpPut("{id}")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
@@ -140,6 +174,7 @@ namespace XactTodo.Api.Controllers
             matter.Subject = input.Subject;
             matter.Content = input.Content;
             matter.ExecutantId = input.ExecutantId;
+            matter.CameFrom = input.CameFrom;
             matter.Password = input.Password;
             matter.RelatedMatterId = input.RelatedMatterId;
             matter.Importance = input.Importance;
@@ -149,17 +184,17 @@ namespace XactTodo.Api.Controllers
             matter.Periodic = input.Periodic;
             matter.Remark = input.Remark;
             matter.TeamId = input.TeamId;
-            if (input.EstimatedTimeRequired != null && input.EstimatedTimeRequired.Num > 0)
+            if (input.EstimatedTimeRequired_Num > 0)
             {
-                matter.EstimatedTimeRequired = input.EstimatedTimeRequired;
+                matter.EstimatedTimeRequired = new PeriodOfTime(input.EstimatedTimeRequired_Num, input.EstimatedTimeRequired_Unit);
             }
             else
             {
                 matter.EstimatedTimeRequired = null;
             }
-            if (input.Periodic && input.IntervalPeriod != null && input.IntervalPeriod.Num > 0)
+            if (input.Periodic && input.IntervalPeriod_Num > 0)
             {
-                matter.IntervalPeriod = input.IntervalPeriod;
+                matter.IntervalPeriod = new PeriodOfTime(input.IntervalPeriod_Num, input.IntervalPeriod_Unit);
             }
             else
             {
@@ -170,32 +205,54 @@ namespace XactTodo.Api.Controllers
             return Ok();
         }
 
-        [Route("{id:int}/[action]")]
-        [HttpPost]
+        /// <summary>
+        /// 删除事项
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Finish(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            return await Finish(id, true);
+            try
+            {
+                matterRepository.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            await matterRepository.UnitOfWork.SaveChangesAsync();
+            return Ok();
         }
 
         [Route("{id:int}/[action]")]
         [HttpPost]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Unfinish(int id)
+        public async Task<IActionResult> Finish(int id, string comment)
         {
-            return await Finish(id, false);
+            return await Finish(id, true, comment);
         }
 
-        private async Task<IActionResult> Finish(int id, bool finished)
+        [Route("{id:int}/[action]")]
+        [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Unfinish(int id, string comment)
+        {
+            return await Finish(id, false, comment);
+        }
+
+        private async Task<IActionResult> Finish(int id, bool finished, string comment)
         {
             var matter = await matterRepository.GetAsync(id);
             if (matter == null)
             {
                 return BadRequest($"Matter not found: {id}");
             }
-            if (!matter.SetFinished(finished))
+            if (!matter.SetFinished(finished, comment, session))
                 return BadRequest();
             await matterRepository.UnitOfWork.SaveChangesAsync();
             return Ok();

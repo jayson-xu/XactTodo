@@ -11,10 +11,10 @@ namespace XactTodo.Api.Controllers
     {
         public IActionResult Index()
         {
-            var absoluteUri = string.Concat(Request.Scheme, "://", Request.Host.ToUriComponent(), Request.PathBase.ToUriComponent(), Request.Path.ToUriComponent());
+            /*var absoluteUri = string.Concat(Request.Scheme, "://", Request.Host.ToUriComponent(), Request.PathBase.ToUriComponent(), Request.Path.ToUriComponent());
             var swaggerUri = Path.Combine(absoluteUri, "swagger");
-            return new RedirectResult(swaggerUri);
-            //return new RedirectResult("~/swagger");
+            return new RedirectResult(swaggerUri);*/
+            return new RedirectResult("~/swagger");
         }
     }
 }

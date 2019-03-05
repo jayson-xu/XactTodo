@@ -14,8 +14,8 @@ namespace XactTodo.Infrastructure.EntityConfigurations
         public void Configure(EntityTypeBuilder<User> builder)
         {
             //builder.Ignore(b => b.DomainEvents);
-            builder.HasIndex(p => new { p.UserName }).IsUnique();
-            builder.HasIndex(p => new { p.Email }).IsUnique();
+            builder.HasIndex(p => p.UserName).IsUnique().HasFilter("IsDeleted=0");
+            builder.HasIndex(p => p.Email).IsUnique().HasFilter("IsDeleted=0");
             builder.HasOne<User>()
                 .WithMany()
                 .IsRequired(false)
