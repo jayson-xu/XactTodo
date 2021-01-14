@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace XactTodo.Domain
+namespace XactTodo.Security.Session
 {
-    public interface ICustomSession
+    public interface IClaimsSession
     {
         /// <summary>
         /// 访问令牌

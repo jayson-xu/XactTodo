@@ -6,19 +6,21 @@ using System.Text;
 using XactTodo.Domain.AggregatesModel.IdentityAggregate;
 using XactTodo.Domain.AggregatesModel.UserAggregate;
 using XactTodo.Domain.Exceptions;
+using XactTodo.Security;
+using XactTodo.Security.Session;
 
 namespace XactTodo.Domain
 {
-    public class AuthenticationService : IAuthenticationService
+    public class AuthService : IAuthService
     {
         public const int TOKEN_EXPIRATION = 3600 * 24 * 7; //seconds 设为7天才过期，客户端不必自动刷新Token
         private readonly ILogger log;
-        private readonly ICustomSession session;
+        private readonly IClaimsSession session;
         private readonly IUserRepository userRepository;
         private readonly IIdentityRepository identityRepository;
 
-        public AuthenticationService(ILogger<AuthenticationService> _log,
-            ICustomSession session,
+        public AuthService(ILogger<AuthService> _log,
+            IClaimsSession session,
             IUserRepository userRepository,
             SeedWork.IRepository<User> userRepository2,
             SeedWork.IRepository<User, int> userRepository3,
@@ -32,6 +34,9 @@ namespace XactTodo.Domain
 
         public Identity Login(string userName, string password)
         {
+            if (string.IsNullOrEmpty(userName))
+                throw new ArgumentNullException(nameof(userName));
+            userName = userName.Trim();
             var user = userRepository.Find(p => p.UserName == userName || p.Email == userName).SingleOrDefault();
             if (user == null)
             {
@@ -77,23 +82,35 @@ namespace XactTodo.Domain
         public Token RefreshToken(string refreshToken)
         {
             var accessToken = session?.AccessToken;
-            var identity = identityRepository.Find(p => p.RefreshToken == refreshToken).FirstOrDefault();
-            if (identity == null)
+            var existed = identityRepository.Find(p => p.RefreshToken == refreshToken).FirstOrDefault();
+            if (existed == null)
             {
                 log.LogWarning($"Identity not found via refresh_token:{refreshToken}");
                 throw new Exception($"[RefreshToken] is invalid! {refreshToken}");
             }
-            if(!identity.AccessToken.Equals(accessToken, StringComparison.InvariantCultureIgnoreCase))
+            if(!existed.AccessToken.Equals(accessToken, StringComparison.InvariantCultureIgnoreCase))
             {
                 log.LogWarning($"access_tokon({accessToken}) & refresh_token({refreshToken}) is not matched!");
                 throw new Exception($"[AccessToken] is invalid! {accessToken}");
             }
+            //添加新的身份证明信息
             var token = Token.NewToken(TOKEN_EXPIRATION);
-            identity.IssueTime = token.IssueTime;
-            identity.AccessToken = token.AccessToken;
-            identity.RefreshToken = token.RefreshToken;
-            identity.ExpiresIn = token.ExpiresIn;
-            identityRepository.Update(identity);
+            var identity = new Identity
+            {
+                UserId = existed.UserId,
+                UserName = existed.UserName,
+                Nickname = existed.Nickname,
+                AccessToken = token.AccessToken,
+                RefreshToken = token.RefreshToken,
+                IssueTime = token.IssueTime,
+                ExpiresIn = token.ExpiresIn
+            };
+            identityRepository.Add(identity);
+            //然后将旧的身份证明信息设置为30秒后过期，以免部分堵塞在路上的请求被拒绝
+            existed.ExpiresIn = (int)(DateTime.Now.AddSeconds(30) - existed.IssueTime).TotalSeconds;
+            identityRepository.Update(existed);
+            //更新数据库
+            identityRepository.UnitOfWork.SaveChangesAsync().Wait();
             return token;
         }
 
@@ -110,6 +127,7 @@ namespace XactTodo.Domain
             {
                 throw new Exception("Token is expired!");
             }
+            identity.RefreshToken = null; //不返回刷新令牌，以免泄漏。即：刷新令牌只能通过登录接口获取到
             return identity;
         }
 

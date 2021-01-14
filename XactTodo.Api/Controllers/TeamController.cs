@@ -9,6 +9,7 @@ using XactTodo.Api.DTO;
 using XactTodo.Api.Queries;
 using XactTodo.Domain;
 using XactTodo.Domain.AggregatesModel.TeamAggregate;
+using XactTodo.Security.Session;
 
 namespace XactTodo.Api.Controllers
 {
@@ -16,11 +17,11 @@ namespace XactTodo.Api.Controllers
     [ApiController]
     public class TeamController : ControllerBase
     {
-        private readonly ICustomSession session;
+        private readonly IClaimsSession session;
         private readonly ITeamRepository teamRepository;
         private readonly ITeamQueries teamQueries;
 
-        public TeamController(ITeamRepository teamRepository, ITeamQueries teamQueries, ICustomSession session)
+        public TeamController(ITeamRepository teamRepository, ITeamQueries teamQueries, IClaimsSession session)
         {
             this.session = session ?? throw new ArgumentNullException(nameof(session));
             this.teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));

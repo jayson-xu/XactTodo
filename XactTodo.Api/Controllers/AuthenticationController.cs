@@ -14,6 +14,7 @@ using XactTodo.Domain.AggregatesModel.IdentityAggregate;
 using XactTodo.Api.Utils;
 using XactTodo.Api.DTO;
 using XactTodo.Domain.Exceptions;
+using XactTodo.Security;
 
 namespace Csci.EasyInventory.WebApi.Controllers
 {
@@ -25,32 +26,18 @@ namespace Csci.EasyInventory.WebApi.Controllers
     [ApiController]
     public class AuthenticationController : Controller
     {
-        private readonly IAuthenticationService authService;
+        private readonly IAuthService authService;
         private readonly TodoContext dbContext;
         private readonly ILogger logger;
 
         public AuthenticationController(
-            IAuthenticationService authService,
+            IAuthService authService,
             TodoContext dbContext,
             ILogger<AuthenticationController> logger)
         {
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             this.authService = authService ?? throw new ArgumentNullException(nameof(authService));
             this.logger = logger ?? throw new ArgumentNullException(nameof(dbContext));
-        }
-
-        private LoginResult BuildLoginResult(Identity identity)
-        {
-            var user = dbContext.Users.Find(identity.UserId);
-            System.Diagnostics.Debug.Assert(user.UserName == identity.UserName);
-            var result = new LoginResult(LoginResultType.Success)
-            {
-                UserId = identity.UserId,
-                UserName = identity.UserName,
-                RealName = user.DisplayName,
-                Token = new Token(identity.AccessToken, identity.RefreshToken, identity.ExpiresIn)
-            };
-            return result;
         }
 
         [HttpGet]
@@ -97,7 +84,7 @@ namespace Csci.EasyInventory.WebApi.Controllers
             {
                 return new LoginResult(LoginResultType.UnkownError, "用户未分配到任何部门/地盘，请先分配。");
             }*/
-            LoginResult result = BuildLoginResult(identity);
+            LoginResult result = LoginResult.FromIdentity(identity);
             return Ok(result);
         }
 
@@ -124,26 +111,26 @@ namespace Csci.EasyInventory.WebApi.Controllers
         /// <summary>
         /// 请求刷新令牌
         /// </summary>
-        /// <param name="refreshToken">刷新令牌</param>
+        /// <param name="token">刷新令牌</param>
         /// <returns></returns>
         [HttpPost]
         [Route("api/[action]")]
         [Authorize]
         [ProducesResponseType(typeof(Token), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), 500)]
-        public IActionResult RefreshToken(string refreshToken)
+        public IActionResult Refresh(string token)
         {
-            Token token;
+            Token tk;
             try
             {
-                token = authService.RefreshToken(refreshToken);
+                tk = authService.RefreshToken(token);
             }
             catch(Exception ex)
             {
                 //return Forbid();
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
-            return Ok(token);
+            return Ok(tk);
         }
 
         /* 移除"当前登录部门/地盘"的概念，因为清查易的使用方式不像CDMS那样，用户经常性固定在某一个地盘
@@ -182,7 +169,7 @@ namespace Csci.EasyInventory.WebApi.Controllers
         /// <summary>
         /// 验证令牌是否有效，有效则返回登录信息
         /// </summary>
-        /// <param name="accessToken">访问令牌</param>
+        /// <param name="token">访问令牌</param>
         /// <returns></returns>
         [HttpGet]
         [AllowAnonymous]
@@ -190,12 +177,12 @@ namespace Csci.EasyInventory.WebApi.Controllers
         [ProducesResponseType(typeof(LoginResult), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), 500)]
-        public IActionResult ValidateToken(string accessToken)
+        public IActionResult Validate(string token)
         {
             Identity identity;
             try
             {
-                identity = authService.ValidateToken(accessToken);
+                identity = authService.ValidateToken(token);
             }
             catch(Exception ex)
             {
@@ -205,7 +192,7 @@ namespace Csci.EasyInventory.WebApi.Controllers
             {
                 return NotFound();
             }
-            var loginResult = BuildLoginResult(identity);
+            var loginResult = LoginResult.FromIdentity(identity);
             return Ok(loginResult);
         }
     }

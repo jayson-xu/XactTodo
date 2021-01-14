@@ -10,25 +10,29 @@ using XactTodo.Api.DTO;
 using XactTodo.Api.Queries;
 using XactTodo.Domain;
 using XactTodo.Domain.AggregatesModel.MatterAggregate;
+using XactTodo.Security.Session;
 
 namespace XactTodo.Api.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class MatterController : ControllerBase
     {
         private const string KEY_AUTHORIZATION = "authorization";
-        private readonly ICustomSession session;
+        private readonly IClaimsSession session;
+        private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ILogger logger;
         private readonly IMatterRepository matterRepository;
         private readonly IMatterQueries matterQueries;
 
         public MatterController(
+            IHttpContextAccessor httpContextAccessor,
             ILogger<MatterController> logger,
             IMatterRepository matterRepository,
             IMatterQueries matterQueries,
-            ICustomSession session)
+            IClaimsSession session)
         {
+            this.httpContextAccessor = httpContextAccessor;
             this.logger = logger;
             this.session = session ?? throw new ArgumentNullException(nameof(session));
             this.matterRepository = matterRepository ?? throw new ArgumentNullException(nameof(matterRepository));

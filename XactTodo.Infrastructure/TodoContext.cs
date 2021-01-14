@@ -17,6 +17,8 @@ using XactTodo.Domain.SeedWork;
 using XactTodo.Infrastructure.Extensions;
 using XactTodo.Infrastructure.EntityConfigurations;
 using XactTodo.Domain.AggregatesModel.IdentityAggregate;
+using XactTodo.Security;
+using XactTodo.Security.Session;
 
 namespace XactTodo.Infrastructure
 {
@@ -24,10 +26,10 @@ namespace XactTodo.Infrastructure
     {
         private const string column_IsDeleted = "IsDeleted";
 
-        public ICustomSession Session { get; }
+        public IClaimsSession Session { get; }
 
         public int InstanceId { get; }
-        public TodoContext(DbContextOptions<TodoContext> options, ICustomSession session) : base(options)
+        public TodoContext(DbContextOptions<TodoContext> options, IClaimsSession session) : base(options)
         {
             this.InstanceId = new Random(Environment.TickCount).Next();
             Session = session;
@@ -72,7 +74,7 @@ namespace XactTodo.Infrastructure
             var typeContext = this.GetType();
             foreach (var prop in typeContext.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (prop.PropertyType.IsGenericType || prop.PropertyType.Name == typeof(DbSet<>).Name)
+                if (prop.PropertyType.IsGenericType && prop.PropertyType.Name == typeof(DbSet<>).Name)
                 {
                     var typeEntity = prop.PropertyType.GetGenericArguments().FirstOrDefault();
                     ConfigEntityProperty(modelBuilder, typeEntity);
@@ -130,7 +132,7 @@ namespace XactTodo.Infrastructure
 
         private void OnBeforeSaving()
         {
-            Session.VerifyLoggedin();
+            //Session.VerifyLoggedin();//不能在这提前校验，因为有些类是无需用户会话信息的，例如登录时记录的身份认证信息
             foreach (var entry in ChangeTracker.Entries().Where(p => p.State != EntityState.Unchanged))
             {
                 var typeEntity = entry.Entity.GetType();
@@ -139,6 +141,7 @@ namespace XactTodo.Infrastructure
                     case EntityState.Added:
                         if (typeEntity.GetInterface(nameof(ICreationAudited)) != null)
                         {
+                            Session.VerifyLoggedin();
                             //只需要给创建人字段赋值，创建时间字段已设置数据库默认值
                             entry.CurrentValues[nameof(ICreationAudited.CreatorUserId)] = Session.UserId;
                         }
@@ -150,6 +153,7 @@ namespace XactTodo.Infrastructure
                     case EntityState.Modified:
                         if (typeEntity.GetInterface(nameof(IModificationAudited)) != null)
                         {
+                            Session.VerifyLoggedin();
                             entry.CurrentValues[nameof(IModificationAudited.LastModifierUserId)] = Session.UserId;
                             entry.CurrentValues[nameof(IModificationAudited.LastModificationTime)] = DateTime.Now;
                         }
@@ -164,6 +168,7 @@ namespace XactTodo.Infrastructure
                         }
                         if (typeEntity.GetInterface(nameof(IDeletionAudited)) != null)
                         {
+                            Session.VerifyLoggedin();
                             entry.CurrentValues[nameof(IDeletionAudited.DeleterUserId)] = Session.UserId;
                             entry.CurrentValues[nameof(IDeletionAudited.DeletionTime)] = DateTime.Now;
                         }
@@ -178,8 +183,10 @@ namespace XactTodo.Infrastructure
     {
         public TodoContext CreateDbContext(string[] args)
         {
+            //const string connectionString = "server=10.1.8.23;userid=root;pwd=123456;port=3306;database=XactTodo;";
+            const string connectionString = "server=10.1.8.40;userid=root;pwd=Passw0rd;port=3306;database=XactTodo;";
             var optionsBuilder = new DbContextOptionsBuilder<TodoContext>();
-            optionsBuilder.UseMySql("server=git.csci.com.hk;userid=root;pwd=123456;port=3306;database=XactTodo;");
+            optionsBuilder.UseMySql(connectionString);
             //optionsBuilder.UseMySql("server=10.1.17.201;userid=root;pwd=123456;port=3306;database=XactTodo;");
 
             return new TodoContext(optionsBuilder.Options, null);

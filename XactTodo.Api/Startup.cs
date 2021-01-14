@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
+using XactTodo.Api.Authentication;
 using XactTodo.Api.Infrastructure;
 using XactTodo.Api.Queries;
 using XactTodo.Api.Utils;
@@ -23,8 +24,10 @@ using XactTodo.Domain.AggregatesModel.UserAggregate;
 using XactTodo.Domain.SeedWork;
 using XactTodo.Infrastructure;
 using XactTodo.Infrastructure.Repositories;
+using XactTodo.Security;
+using XactTodo.Security.Session;
 
-namespace XactTodo.WebApi
+namespace XactTodo.Api
 {
     public class Startup
     {
@@ -112,14 +115,14 @@ namespace XactTodo.WebApi
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             var env = services.BuildServiceProvider().GetService<IHostingEnvironment>();
             Logger.LogDebug(env.EnvironmentName);
-            if (env.IsDevelopment())
+            /*if (env.IsDevelopment())
             {
-                services.AddSingleton<ICustomSession, MockSession>();
+                services.AddSingleton<IClaimsSession, MockSession>();
             }
-            else
+            else*/
             {
-                services.AddSingleton<ICustomSession, MockSession>(); //暂时先用模拟Session
-                //services.AddSingleton<ICustomSession, CustomSession>();
+                //services.AddSingleton<IClaimsSession, MockSession>(); //暂时先用模拟Session
+                services.AddSingleton<IClaimsSession, ClaimsSession>();
             }
             //services.AddScoped<ITeamRepository, TeamRepository>();
             //services.AddScoped<IMatterRepository, MatterRepository>();
@@ -129,8 +132,14 @@ namespace XactTodo.WebApi
             RegisterRepositoryTypes(services);
             services.Add(new ServiceDescriptor(typeof(ITeamQueries), new TeamQueries(connectionString)));
             services.Add(new ServiceDescriptor(typeof(IMatterQueries), new MatterQueries(connectionString)));
+            //添加身份验证
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = BearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = BearerDefaults.AuthenticationScheme;
+            }).AddBearer();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddDbContext<TodoContext>(options =>
             {
@@ -189,7 +198,7 @@ namespace XactTodo.WebApi
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.UseAuthentication();
+            app.UseAuthentication();
 
             //跨域
             app.UseCors(corsPolicyName);

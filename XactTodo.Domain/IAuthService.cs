@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using XactTodo.Domain.AggregatesModel.IdentityAggregate;
 using XactTodo.Domain.SeedWork;
+using XactTodo.Security;
 
 namespace XactTodo.Domain
 {
-    public interface IAuthenticationService: IService
+    public interface IAuthService: IService
     {
         Identity Login(string userName, string password);
 

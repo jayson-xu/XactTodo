@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using XactTodo.Domain;
 using XactTodo.Domain.AggregatesModel.IdentityAggregate;
+using XactTodo.Security;
 
 namespace XactTodo.Api.DTO
 {
@@ -23,27 +24,6 @@ namespace XactTodo.Api.DTO
         public string ErrorMessage { get; set; }
 
         /// <summary>
-        /// 机构ID
-        /// </summary>
-        public int? OrganId { get; set; }
-
-        /// <summary>
-        /// 机构编码
-        /// </summary>
-        public string OrganCode { get; set; }
-
-        /// <summary>
-        /// 机构名称
-        /// </summary>
-        public string OrganName { get; set; }
-
-        /*// <summary>
-        /// 机构类型(Corporation:公司 Fictitious:虚拟机构 Department:部门 Project:项目)
-        /// </summary>
-        public String OrganType { get; set; }
-        */
-
-        /// <summary>
         /// 用户ID
         /// </summary>
         public int UserId { get; set; }
@@ -54,9 +34,9 @@ namespace XactTodo.Api.DTO
         public string UserName { get; set; }
 
         /// <summary>
-        /// 用户姓名
+        /// 昵称
         /// </summary>
-        public string RealName { get; set; }
+        public string Nickname { get; set; }
 
         /// <summary>
         /// 令牌
@@ -81,7 +61,14 @@ namespace XactTodo.Api.DTO
 
         public static LoginResult FromIdentity(Identity identity)
         {
-            throw new NotImplementedException();
+            var result = new LoginResult(LoginResultType.Success)
+            {
+                UserId = identity.UserId,
+                UserName = identity.UserName,
+                Nickname = identity.Nickname,
+                Token = new Token(identity.AccessToken, identity.RefreshToken, identity.ExpiresIn)
+            };
+            return result;
         }
 
     }

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using XactTodo.Domain.SeedWork;
+using XactTodo.Security;
+using XactTodo.Security.Session;
 
 namespace XactTodo.Domain.AggregatesModel.MatterAggregate
 {
@@ -69,7 +71,7 @@ namespace XactTodo.Domain.AggregatesModel.MatterAggregate
 
         //public IEnumerable<Attachment> Attachments { get; set; }
 
-        public bool SetFinished(bool finished, string comment, ICustomSession session)
+        public bool SetFinished(bool finished, string comment, IClaimsSession session)
         {
             if (this.Finished == finished)
                 return false;

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using XactTodo.Api.Utils;
 using XactTodo.Domain;
 using XactTodo.Domain.AggregatesModel.UserAggregate;
+using XactTodo.Security.Session;
 
 namespace XactTodo.Api.Controllers
 {
@@ -18,13 +19,13 @@ namespace XactTodo.Api.Controllers
     {
         private readonly ILogger logger;
         private readonly IUserRepository userRepository;
-        private readonly ICustomSession session;
+        private readonly IClaimsSession session;
         private readonly SmtpConfig smtpConfig;
 
         public UserController(
             ILogger<UserController> logger,
             IUserRepository userRepository,
-            ICustomSession session,
+            IClaimsSession session,
             IOptions<SmtpConfig> smtpConfig)
         {
             this.logger = logger;

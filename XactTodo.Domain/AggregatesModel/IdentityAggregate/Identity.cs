@@ -9,7 +9,7 @@ using XactTodo.Domain.SeedWork;
 namespace XactTodo.Domain.AggregatesModel.IdentityAggregate
 {
     /// <summary>
-    /// 身份认证
+    /// 身份证明信息
     /// </summary>
     /// <remarks>每成功发放/更新一次令牌则记录一次</remarks>
     public class Identity : BaseEntity, IAggregateRoot

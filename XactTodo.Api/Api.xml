@@ -4,37 +4,15 @@
         <name>XactTodo.Api</name>
     </assembly>
     <members>
-        <member name="T:Csci.EasyInventory.WebApi.Controllers.AuthenticationController">
+        <member name="T:XactTodo.Api.Authentication.BearerDefaults">
             <summary>
-            用户认证
+            身份验证相关的一些默认值
             </summary>
         </member>
-        <member name="M:Csci.EasyInventory.WebApi.Controllers.AuthenticationController.Login(XactTodo.Api.DTO.LoginInput)">
+        <member name="F:XactTodo.Api.Authentication.BearerDefaults.AuthenticationScheme">
             <summary>
-            用户登录
+            AuthenticationScheme 选项默认值
             </summary>
-            <param name="input"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Csci.EasyInventory.WebApi.Controllers.AuthenticationController.Logout">
-            <summary>
-            登出
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Csci.EasyInventory.WebApi.Controllers.AuthenticationController.RefreshToken(System.String)">
-            <summary>
-            请求刷新令牌
-            </summary>
-            <param name="refreshToken">刷新令牌</param>
-            <returns></returns>
-        </member>
-        <member name="M:Csci.EasyInventory.WebApi.Controllers.AuthenticationController.ValidateToken(System.String)">
-            <summary>
-            验证令牌是否有效，有效则返回登录信息
-            </summary>
-            <param name="accessToken">访问令牌</param>
-            <returns></returns>
         </member>
         <member name="M:XactTodo.Api.Controllers.MatterController.Create(XactTodo.Api.DTO.MatterInput)">
             <summary>
@@ -107,21 +85,6 @@
             登录或验证失败时，可通过此属性向前台反馈更明确的错误信息
             </summary>
         </member>
-        <member name="P:XactTodo.Api.DTO.LoginResult.OrganId">
-            <summary>
-            机构ID
-            </summary>
-        </member>
-        <member name="P:XactTodo.Api.DTO.LoginResult.OrganCode">
-            <summary>
-            机构编码
-            </summary>
-        </member>
-        <member name="P:XactTodo.Api.DTO.LoginResult.OrganName">
-            <summary>
-            机构名称
-            </summary>
-        </member>
         <member name="P:XactTodo.Api.DTO.LoginResult.UserId">
             <summary>
             用户ID
@@ -132,9 +95,9 @@
             用户账号
             </summary>
         </member>
-        <member name="P:XactTodo.Api.DTO.LoginResult.RealName">
+        <member name="P:XactTodo.Api.DTO.LoginResult.Nickname">
             <summary>
-            用户姓名
+            昵称
             </summary>
         </member>
         <member name="P:XactTodo.Api.DTO.LoginResult.Token">
@@ -308,11 +271,6 @@
         <member name="P:XactTodo.Api.DTO.TeamInput.ProposedTags">
             <summary>
             组内提议使用的Tags(多个Tag之间以;号分隔)
-            </summary>
-        </member>
-        <member name="P:XactTodo.Api.Infrastructure.CustomSession.Current">
-            <summary>
-            当前会话实例
             </summary>
         </member>
         <member name="T:XactTodo.Api.Infrastructure.TodoContextSeed">
@@ -574,6 +532,16 @@
             组员
             </summary>
         </member>
+        <member name="M:XactTodo.Api.Startup.RegisterServiceTypes(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            自动注册Domain项目中的所有Service类
+            </summary>
+        </member>
+        <member name="M:XactTodo.Api.Startup.RegisterRepositoryTypes(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            自动注册Domain项目中的所有仓储类
+            </summary>
+        </member>
         <member name="T:XactTodo.Api.Utils.EmailHelper">
             <summary>
             邮件发送辅助类
@@ -605,15 +573,37 @@
             <param name="exception"></param>
             <returns></returns>
         </member>
-        <member name="M:XactTodo.WebApi.Startup.RegisterServiceTypes(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+        <member name="T:Csci.EasyInventory.WebApi.Controllers.AuthenticationController">
             <summary>
-            自动注册Domain项目中的所有Service类
+            用户认证
             </summary>
         </member>
-        <member name="M:XactTodo.WebApi.Startup.RegisterRepositoryTypes(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+        <member name="M:Csci.EasyInventory.WebApi.Controllers.AuthenticationController.Login(XactTodo.Api.DTO.LoginInput)">
             <summary>
-            自动注册Domain项目中的所有仓储类
+            用户登录
             </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Csci.EasyInventory.WebApi.Controllers.AuthenticationController.Logout">
+            <summary>
+            登出
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Csci.EasyInventory.WebApi.Controllers.AuthenticationController.Refresh(System.String)">
+            <summary>
+            请求刷新令牌
+            </summary>
+            <param name="token">刷新令牌</param>
+            <returns></returns>
+        </member>
+        <member name="M:Csci.EasyInventory.WebApi.Controllers.AuthenticationController.Validate(System.String)">
+            <summary>
+            验证令牌是否有效，有效则返回登录信息
+            </summary>
+            <param name="token">访问令牌</param>
+            <returns></returns>
         </member>
     </members>
 </doc>

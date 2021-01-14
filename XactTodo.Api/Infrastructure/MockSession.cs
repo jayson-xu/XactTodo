@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using XactTodo.Domain;
+using XactTodo.Security.Session;
 
 namespace XactTodo.Api.Infrastructure
 {
-    public class MockSession : ICustomSession
+    public class MockSession : IClaimsSession
     {
         public string AccessToken => "";
 

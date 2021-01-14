@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\XactTodo.Domain\XactTodo.Domain.csproj" />
+    <ProjectReference Include="..\XactTodo.Security\XactTodo.Security.csproj" />
   </ItemGroup>
 
 </Project>

@@ -14,7 +14,7 @@ using XactTodo.Api.Infrastructure;
 using XactTodo.Infrastructure;
 using NLog.Web;
 
-namespace XactTodo.WebApi
+namespace XactTodo.Api
 {
     public class Program
     {
