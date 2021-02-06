@@ -18,12 +18,12 @@ namespace XactTodo.Api.Queries
         /// <summary>
         /// 主题
         /// </summary>
-        public string Subject { get; private set; }
+        public string Subject { get; set; }
 
         /// <summary>
         /// 内容
         /// </summary>
-        public string Content { get; private set; }
+        public string Content { get; set; }
 
         /// <summary>
         /// 负责人Id
@@ -38,17 +38,17 @@ namespace XactTodo.Api.Queries
         /// <summary>
         /// 重要性
         /// </summary>
-        public int Importance { get; private set; }
+        public int Importance { get; set; }
 
         /// <summary>
         /// 预计需时 数量
         /// </summary>
-        public decimal EstimatedTimeRequired_Num { get; private set; }
+        public decimal EstimatedTimeRequired_Num { get; set; }
 
         /// <summary>
         /// 预计需时 单位(枚举)
         /// </summary>
-        public int EstimatedTimeRequired_Unit { get; private set; }
+        public int EstimatedTimeRequired_Unit { get; set; }
 
         /// <summary>
         /// 预计需时描述
@@ -67,32 +67,32 @@ namespace XactTodo.Api.Queries
         /// <summary>
         /// 最后期限
         /// </summary>
-        public DateTime? Deadline { get; private set; }
+        public DateTime? Deadline { get; set; }
 
         /// <summary>
         /// 已完成
         /// </summary>
-        public bool Finished { get; private set; }
+        public bool Finished { get; set; }
 
         /// <summary>
         /// 完成时间
         /// </summary>
-        public DateTime? FinishTime { get; private set; }
+        public DateTime? FinishTime { get; set; }
 
         /// <summary>
         /// 周期性事项
         /// </summary>
-        public bool Periodic { get; private set; }
+        public bool Periodic { get; set; }
 
         /// <summary>
         /// 间隔周期 数量
         /// </summary>
-        public decimal IntervalPeriod_Num { get; private set; }
+        public decimal IntervalPeriod_Num { get; set; }
 
         /// <summary>
         /// 间隔周期 单位(枚举)
         /// </summary>
-        public int IntervalPeriod_Unit { get; private set; }
+        public int IntervalPeriod_Unit { get; set; }
 
         /// <summary>
         /// 间隔周期描述
@@ -111,12 +111,12 @@ namespace XactTodo.Api.Queries
         /// <summary>
         /// 备注
         /// </summary>
-        public string Remark { get; private set; }
+        public string Remark { get; set; }
 
         /// <summary>
         /// 所属小组，此属性值为null时表示归属个人
         /// </summary>
-        public int? TeamId { get; private set; }
+        public int? TeamId { get; set; }
 
         /// <summary>
         /// 所属小组
@@ -136,34 +136,49 @@ namespace XactTodo.Api.Queries
     }
 
     /// <summary>
-    /// 事项
+    /// 事项概略
     /// </summary>
     public class MatterOutline
     {
         /// <summary>
+        /// 主键
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
         /// 主题
         /// </summary>
-        public string Subject { get; private set; }
+        public string Subject { get; set; }
+
+        /// <summary>
+        /// 具体内容
+        /// </summary>
+        public string Content { get; set; }
 
         /// <summary>
         /// 重要性
         /// </summary>
-        public int Importance { get; private set; }
+        public int Importance { get; set; }
+
+        /// <summary>
+        /// 进展情况
+        /// </summary>
+        public int Status { get; set; }
+
+        /// <summary>
+        /// 进展情况描述
+        /// </summary>
+        public string ProgressStatus { get; set; }
 
         /// <summary>
         /// 最后期限
         /// </summary>
-        public DateTime? Deadline { get; private set; }
-
-        /// <summary>
-        /// 已完成
-        /// </summary>
-        public bool Finished { get; private set; }
+        public DateTime? Deadline { get; set; }
 
         /// <summary>
         /// 完成时间
         /// </summary>
-        public DateTime? FinishTime { get; private set; }
+        public DateTime? FinishTime { get; set; }
 
         /// <summary>
         /// 所属小组
@@ -195,17 +210,17 @@ namespace XactTodo.Api.Queries
         /// <summary>
         /// 主题
         /// </summary>
-        public string Subject { get; private set; }
+        public string Subject { get; set; }
 
         /// <summary>
         /// 重要性
         /// </summary>
-        public int Importance { get; private set; }
+        public int Importance { get; set; }
 
         /// <summary>
         /// 最后期限
         /// </summary>
-        public DateTime? Deadline { get; private set; }
+        public DateTime? Deadline { get; set; }
 
         /// <summary>
         /// 所属小组

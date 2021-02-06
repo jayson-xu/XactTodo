@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XactTodo.Api", "XactTodo.Api\XactTodo.Api.csproj", "{27167A26-5072-4B10-800A-668961FC1DF5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XactTodo.Domain", "XactTodo.Domain\XactTodo.Domain.csproj", "{CE18345E-F758-4420-8139-8357C4D9DB27}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XactTodo.Infrastructure", "XactTodo.Infrastructure\XactTodo.Infrastructure.csproj", "{1A0B73BB-B063-4DF5-B1E4-BD08244B76F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XactTodo.Security", "XactTodo.Security\XactTodo.Security.csproj", "{9E588A10-4A42-4CC2-9A59-DAB03ECF84B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XactTodo.Security", "XactTodo.Security\XactTodo.Security.csproj", "{9E588A10-4A42-4CC2-9A59-DAB03ECF84B8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XactTodo.Api", "XactTodo.Api\XactTodo.Api.csproj", "{FEB230B7-14D8-4C5A-B3B0-2B6B984BD7FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{27167A26-5072-4B10-800A-668961FC1DF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{27167A26-5072-4B10-800A-668961FC1DF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{27167A26-5072-4B10-800A-668961FC1DF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{27167A26-5072-4B10-800A-668961FC1DF5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CE18345E-F758-4420-8139-8357C4D9DB27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CE18345E-F758-4420-8139-8357C4D9DB27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE18345E-F758-4420-8139-8357C4D9DB27}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{9E588A10-4A42-4CC2-9A59-DAB03ECF84B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E588A10-4A42-4CC2-9A59-DAB03ECF84B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E588A10-4A42-4CC2-9A59-DAB03ECF84B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEB230B7-14D8-4C5A-B3B0-2B6B984BD7FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEB230B7-14D8-4C5A-B3B0-2B6B984BD7FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEB230B7-14D8-4C5A-B3B0-2B6B984BD7FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEB230B7-14D8-4C5A-B3B0-2B6B984BD7FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

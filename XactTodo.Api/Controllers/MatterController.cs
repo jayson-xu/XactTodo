@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ using XactTodo.Api.Queries;
 using XactTodo.Domain;
 using XactTodo.Domain.AggregatesModel.MatterAggregate;
 using XactTodo.Security.Session;
+using XactTodo.Api.Utils;
 
 namespace XactTodo.Api.Controllers
 {
@@ -24,6 +26,9 @@ namespace XactTodo.Api.Controllers
         private readonly ILogger logger;
         private readonly IMatterRepository matterRepository;
         private readonly IMatterQueries matterQueries;
+        private static Dictionary<int, string> timeUnits;
+        private static Dictionary<int, string> importances;
+        private static Dictionary<int, string> progressStatuses;
 
         public MatterController(
             IHttpContextAccessor httpContextAccessor,
@@ -36,10 +41,48 @@ namespace XactTodo.Api.Controllers
             this.logger = logger;
             this.session = session ?? throw new ArgumentNullException(nameof(session));
             this.matterRepository = matterRepository ?? throw new ArgumentNullException(nameof(matterRepository));
-            this.matterQueries = matterQueries ?? throw new ArgumentNullException(nameof(matterQueries)); ;
+            this.matterQueries = matterQueries ?? throw new ArgumentNullException(nameof(matterQueries));
+            InitializeStaticData();
         }
 
-        private IEnumerable<KeyValuePair<int,string>> GetEnumKeyValues<T>() where T: Enum
+        private void InitializeStaticData()
+        {
+            if (timeUnits == null)
+            {
+                timeUnits = new Dictionary<int, string>
+                {
+                    { (int)TimeUnit.Weekday, "工作日" },
+                    { (int)TimeUnit.NaturalDay, "自然日" },
+                    { (int)TimeUnit.Week, "周" },
+                    { (int)TimeUnit.Month, "月" },
+                    { (int)TimeUnit.Year, "年" },
+                };
+            }
+            if (importances == null)
+            {
+                importances = new Dictionary<int, string>
+                {
+                    { (int)Importance.Uncertain, "不确定"},
+                    { (int)Importance.Unimportant, "不重要"},
+                    { (int)Importance.Normal, "一般"},
+                    { (int)Importance.Important, "重要"},
+                    { (int)Importance.VeryImportant, "非常重要"},
+                };
+            }
+            if(progressStatuses==null)
+            {
+                progressStatuses = new Dictionary<int, string>
+                {
+                    {(int)ProgressStatus.NotStarted, "未开始" },
+                    {(int)ProgressStatus.Suspend, "暂停" },
+                    {(int)ProgressStatus.InProgress, "进行中" },
+                    {(int)ProgressStatus.Finished, "已完成" },
+                    {(int)ProgressStatus.Aborted, "中止" },
+                };
+            }
+        }
+
+        private static IEnumerable<KeyValuePair<int,string>> GetEnumKeyValues<T>() where T: Enum
         {
             var values = (T[]) Enum.GetValues(typeof(T));
             var kvs = new KeyValuePair<int, string>[values.Length];
@@ -50,41 +93,47 @@ namespace XactTodo.Api.Controllers
             return kvs;
         }
 
-        [Route("importances")]
-        [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<KeyValuePair<int, string>>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetImportances()
+        /// <summary>
+        /// 获取重要性列表
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("importances")]
+        [ProducesResponseType(typeof(IEnumerable<ValueTextPair<int>>), (int)HttpStatusCode.OK)]
+        public IActionResult GetImportances()
         {
-            //var kvs = GetEnumKeyValues<Importance>();
-            var kvs = new KeyValuePair<int, string>[]
-            {
-                new KeyValuePair<int, string>((int)Importance.Uncertain, "不确定"),
-                new KeyValuePair<int, string>((int)Importance.Unimportant, "不重要"),
-                new KeyValuePair<int, string>((int)Importance.Normal, "一般"),
-                new KeyValuePair<int, string>((int)Importance.Important, "重要"),
-                new KeyValuePair<int, string>((int)Importance.VeryImportant, "非常重要"),
-            };
-            return Ok(kvs);
+            // 将字典转换为ValueTextPair数组，否则前台得到的将是一个对象：{"0":"不确定", "1": "不重要"...}
+            return Ok(importances.ToValueTextCollection());
         }
 
-        [Route("timeunits")]
-        [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<KeyValuePair<int,string>>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetTimeUnits()
+        /// <summary>
+        /// 获取时间单位列表
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("timeunits")]
+        [ProducesResponseType(typeof(IEnumerable<ValueTextPair<int>>), (int)HttpStatusCode.OK)]
+        public IActionResult GetTimeUnits()
         {
-            var kvs = new KeyValuePair<int, string>[]
-            {
-                new KeyValuePair<int, string>((int)TimeUnit.Weekday, "工作日"),
-                new KeyValuePair<int, string>((int)TimeUnit.NaturalDay, "自然日"),
-                new KeyValuePair<int, string>((int)TimeUnit.Week, "周"),
-                new KeyValuePair<int, string>((int)TimeUnit.Month, "月"),
-                new KeyValuePair<int, string>((int)TimeUnit.Year, "年"),
-            };
-            return Ok(kvs);
+            // 将字典转换为ValueTextPair数组，否则前台得到的将是一个对象：{"0":"工作日", "1": "自然日"...}
+            return Ok(timeUnits.ToValueTextCollection());
         }
 
-        [Route("unfinished")]
-        [HttpGet]
+        /// <summary>
+        /// 获取进展情况集合
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("progressstatuses")]
+        [ProducesResponseType(typeof(IEnumerable<ValueTextPair<int>>), (int)HttpStatusCode.OK)]
+        public IActionResult GetProgressStatuses()
+        {
+            return Ok(progressStatuses.ToValueTextCollection());
+        }
+
+        /// <summary>
+        /// 获取未完成的事项
+        /// </summary>
+        /// <param name="excludedTeamsId">排除指定小组(例如私密)</param>
+        /// <returns></returns>
+        [HttpGet("unfinished")]
         [ProducesResponseType(typeof(IEnumerable<UnfinishedMatterOutline>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetUnfinishedMatters(string excludedTeamsId)
         {
@@ -94,13 +143,17 @@ namespace XactTodo.Api.Controllers
             return Ok(unfinishedMatters);
         }
 
-        [Route("{id:int}")] //加上类型声明的好处是，如果传入的参数不是整数则直接返回404，不加则返回400并报告错误"The value 'xxx' is not valid."
-        [HttpGet]
+        /// <summary>
+        /// 获取指定事项
+        /// </summary>
+        /// <param name="id">事项Id</param>
+        /// <returns></returns>
+        [HttpGet("{id:int}")] //加上类型声明的好处是，如果传入的参数不是整数则直接返回404，不加则返回400并报告错误"The value 'xxx' is not valid."
         [ProducesResponseType(typeof(Queries.Matter), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
         [ProducesResponseType(typeof(void), 500)]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById([FromRoute]int id)
         {
             try
             {
@@ -115,12 +168,31 @@ namespace XactTodo.Api.Controllers
         }
 
         /// <summary>
+        /// 获取全部事项
+        /// </summary>
+        /// <param name="search"></param>
+        /// <param name="status"></param>
+        /// <param name="page"></param>
+        /// <param name="limit"></param>
+        /// <param name="sortOrder"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetAll(string search, ProgressStatus? status, int page = 1, int limit = 10, string sortOrder = "")
+        {
+            var matters = await matterQueries.GetMattersAsync(search, status, page, limit, sortOrder);
+            foreach(var matter in matters.Rows)
+            {
+                matter.ProgressStatus = progressStatuses[matter.Status];
+            }
+            return Ok(matters);
+        }
+
+        /// <summary>
         /// 创建新事项
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
         //POST api/v1/[controller]/[action]
-        //[Route("[action]")]
         [HttpPost]
         [ProducesResponseType(typeof(int), (int)HttpStatusCode.Created)]
         public async Task<IActionResult> Create(MatterInput input)
@@ -135,8 +207,7 @@ namespace XactTodo.Api.Controllers
                 RelatedMatterId = input.RelatedMatterId,
                 Importance = input.Importance,
                 Deadline = input.Deadline,
-                Finished = input.Finished,
-                FinishTime = input.FinishTime,
+                Status = ProgressStatus.NotStarted,
                 Periodic = input.Periodic,
                 Remark = input.Remark,
                 TeamId = input.TeamId
@@ -183,7 +254,7 @@ namespace XactTodo.Api.Controllers
             matter.RelatedMatterId = input.RelatedMatterId;
             matter.Importance = input.Importance;
             matter.Deadline = input.Deadline;
-            matter.Finished = input.Finished;
+            matter.StartTime = input.StartTime;
             matter.FinishTime = input.FinishTime;
             matter.Periodic = input.Periodic;
             matter.Remark = input.Remark;
@@ -214,10 +285,10 @@ namespace XactTodo.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpDelete]
+        [HttpDelete("{id:int}")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete([FromRoute]int id)
         {
             try
             {
@@ -231,33 +302,78 @@ namespace XactTodo.Api.Controllers
             return Ok();
         }
 
-        [Route("{id:int}/[action]")]
-        [HttpPost]
+        /*
+        /// <summary>
+        /// 开始(或恢复)执行指定事项
+        /// </summary>
+        [HttpPost("{id:int}/[action]")]
+        [Authorize]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Finish(int id, string comment)
+        public async Task<IActionResult> Start(int id, CommentInput input)
         {
-            return await Finish(id, true, comment);
+            return await UpdateProgress(id, ProgressStatus.InProgress, input.Comment, input.StartTime, null);
         }
 
-        [Route("{id:int}/[action]")]
-        [HttpPost]
+        /// <summary>
+        /// 暂停执行指定事项
+        /// </summary>
+        [HttpPost("{id:int}/[action]")]
+        [Authorize]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Unfinish(int id, string comment)
+        public async Task<IActionResult> Suspend(int id, CommentInput input)
         {
-            return await Finish(id, false, comment);
+            return await UpdateProgress(id, ProgressStatus.Suspend, input.Comment, null, null);
         }
 
-        private async Task<IActionResult> Finish(int id, bool finished, string comment)
+        /// <summary>
+        /// 将指定事项更新为已完成状态
+        /// </summary>
+        [HttpPost("{id:int}/[action]")]
+        [Authorize]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Finish(int id, CommentInput input)
+        {
+            return await UpdateProgress(id, ProgressStatus.Finished, input.Comment, input.StartTime, input.FinishTime);
+        }
+
+        /// <summary>
+        /// 中止执行指定事项
+        /// </summary>
+        [HttpPost("{id:int}/[action]")]
+        [Authorize]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Abort(int id, CommentInput input)
+        {
+            return await UpdateProgress(id, ProgressStatus.Aborted, input.Comment, null, null);
+        }
+        */
+
+        /// <summary>
+        /// 更新事项进展状况
+        /// </summary>
+        [HttpPost("{id:int}/[action]")]
+        [Authorize]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateProgressStatus(int id, ProgressUpdateAsk ask)
+        {
+            if (!Enum.IsDefined(typeof(ProgressStatus), ask.NewStatus))
+                return BadRequest($"无效的进展状况值：{ask.NewStatus}");
+            return await UpdateProgress(id, (ProgressStatus)ask.NewStatus, ask.Comment, ask.StartTime, ask.FinishTime);
+        }
+
+        private async Task<IActionResult> UpdateProgress(int id, ProgressStatus status, string comment, DateTime?startTime, DateTime? finishTime)
         {
             var matter = await matterRepository.GetAsync(id);
             if (matter == null)
             {
                 return BadRequest($"Matter not found: {id}");
             }
-            if (!matter.SetFinished(finished, comment, session))
-                return BadRequest();
+            matter.UpdateProgress(session, status, comment, startTime, finishTime);
             await matterRepository.UnitOfWork.SaveChangesAsync();
             return Ok();
         }

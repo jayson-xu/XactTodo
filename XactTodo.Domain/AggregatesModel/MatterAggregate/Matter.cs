@@ -15,10 +15,16 @@ namespace XactTodo.Domain.AggregatesModel.MatterAggregate
         public const int MaxRemarkLength = 500;
         public const int MaxCameFromLength = 50;
 
+        /// <summary>
+        /// 主题
+        /// </summary>
         [Required]
         [StringLength(MaxSubjectLength)]
         public string Subject { get; set; }
 
+        /// <summary>
+        /// 具体内容
+        /// </summary>
         [Required(AllowEmptyStrings = true)]
         public string Content { get; set; }
 
@@ -39,7 +45,7 @@ namespace XactTodo.Domain.AggregatesModel.MatterAggregate
         /// <remarks>如果设定了此密码，则在查看或编辑事项详情时必须先核对密码，事项创建人可重置此密码</remarks>
         [StringLength(MaxPasswordLength)]
         public string Password { get; set; }
-        
+
         /// <summary>
         /// 关联事项
         /// </summary>
@@ -51,13 +57,15 @@ namespace XactTodo.Domain.AggregatesModel.MatterAggregate
 
         public DateTime? Deadline { get; set; }
 
-        public bool Finished { get; set; }
+        public ProgressStatus Status { get; set; }
+
+        public DateTime? StartTime { get; set; }
 
         public DateTime? FinishTime { get; set; }
 
         public bool Periodic { get; set; }
 
-        public PeriodOfTime IntervalPeriod {get; set;}
+        public PeriodOfTime IntervalPeriod { get; set; }
 
         [StringLength(MaxRemarkLength)]
         public string Remark { get; set; }
@@ -71,19 +79,52 @@ namespace XactTodo.Domain.AggregatesModel.MatterAggregate
 
         //public IEnumerable<Attachment> Attachments { get; set; }
 
-        public bool SetFinished(bool finished, string comment, IClaimsSession session)
+        public void UpdateProgress(IClaimsSession session, ProgressStatus status, string comment, DateTime? startTime=null, DateTime? finishTime=null)
         {
-            if (this.Finished == finished)
-                return false;
-            this.Finished = finished;
-            this.FinishTime = finished ? DateTime.Now : (DateTime?)null;
+            if (this.Status == status)
+                throw new ApplicationException($"该事项当前进展状况与欲更新为进展状况相同，可能后台数据已更新");
+            string descr;
+            this.FinishTime = null;
+            switch (status)
+            {
+                case ProgressStatus.NotStarted:
+                    descr = "暂不安排";
+                    this.StartTime = null;
+                    break;
+                case ProgressStatus.Suspend:
+                    descr = "暂缓计划";
+                    break;
+                case ProgressStatus.InProgress:
+                    //如果之前不是暂停状态，则重新计时
+                    if (this.Status != ProgressStatus.Suspend)
+                    {
+                        descr = "重启事项";
+                        this.StartTime = startTime ?? DateTime.Now;
+                    }
+                    else
+                    {
+                        descr = "恢复执行";
+                    }
+                    break;
+                case ProgressStatus.Finished:
+                    if (startTime.HasValue)
+                        this.StartTime = startTime.Value;
+                    this.FinishTime = finishTime?? DateTime.Now;
+                    descr = "事项完成";
+                    break;
+                case ProgressStatus.Aborted:
+                    descr = "事项中止";
+                    break;
+                default:
+                    throw new ApplicationException($"未处理的枚举值：{status}");
+            }
+            this.Status = status;
             this.Evolvements.Add(new Evolvement
             {
-                Comment = (finished ? "事项完成" : "重启事项") + (string.IsNullOrWhiteSpace(comment) ? "" : "：")
+                Comment = descr + (string.IsNullOrWhiteSpace(comment) ? "" : "：")
                 + $"{comment} by {session.NickName}({session.UserName})",
                 MatterId = this.Id,
             });
-            return true;
         }
     }
 }

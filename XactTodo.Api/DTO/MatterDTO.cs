@@ -20,12 +20,14 @@ namespace XactTodo.Api.DTO
         /// <summary>
         /// 主题
         /// </summary>
+        [Required]
         [StringLength(Matter.MaxSubjectLength)]
         public string Subject { get; set; }
 
         /// <summary>
         /// 内容
         /// </summary>
+        [Required(AllowEmptyStrings = true)]
         public string Content { get; set; }
 
         /// <summary>
@@ -77,9 +79,9 @@ namespace XactTodo.Api.DTO
         public DateTime? Deadline { get; set; }
 
         /// <summary>
-        /// 已完成
+        /// 开始时间
         /// </summary>
-        public bool Finished { get; set; }
+        public DateTime? StartTime { get; set; }
 
         /// <summary>
         /// 完成时间

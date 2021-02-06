@@ -54,8 +54,8 @@ namespace XactTodo.Infrastructure
         {
             //将所有decimal类型的字段都默认设置为decimal(18,2)，通过后面的ApplyConfiguration()方法可个别再调整
             //但是需要留意：值对象对应的字段配置不了，因为那已经是实体类属性的属性了，需要通过EntityTypeBuilder.OwnsOne().Property().HasColumnType()来配置
-            foreach (var pb in modelBuilder.Model
-                .GetEntityTypes()
+            var entityTypes = modelBuilder.Model.GetEntityTypes().Where(p => !p.ClrType.IsSubclassOf(typeof(ValueObject))).ToArray(); //这里一定要排除掉值类型的EntityType，否则，嘿嘿，够喝上一壶的
+            foreach (var pb in entityTypes
                 .SelectMany(t => t.GetProperties())
                 .Where(p => p.ClrType == typeof(decimal))
                 .Select(p => modelBuilder.Entity(p.DeclaringEntityType.ClrType).Property(p.Name)))
@@ -183,10 +183,9 @@ namespace XactTodo.Infrastructure
     {
         public TodoContext CreateDbContext(string[] args)
         {
-            //const string connectionString = "server=10.1.8.23;userid=root;pwd=123456;port=3306;database=XactTodo;";
             const string connectionString = "server=10.1.8.40;userid=root;pwd=Passw0rd;port=3306;database=XactTodo;";
             var optionsBuilder = new DbContextOptionsBuilder<TodoContext>();
-            optionsBuilder.UseMySql(connectionString);
+            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             //optionsBuilder.UseMySql("server=10.1.17.201;userid=root;pwd=123456;port=3306;database=XactTodo;");
 
             return new TodoContext(optionsBuilder.Options, null);

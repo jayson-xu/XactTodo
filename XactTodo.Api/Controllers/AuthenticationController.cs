@@ -15,6 +15,7 @@ using XactTodo.Api.Utils;
 using XactTodo.Api.DTO;
 using XactTodo.Domain.Exceptions;
 using XactTodo.Security;
+using XactTodo.Security.Session;
 
 namespace Csci.EasyInventory.WebApi.Controllers
 {
@@ -33,6 +34,7 @@ namespace Csci.EasyInventory.WebApi.Controllers
         public AuthenticationController(
             IAuthService authService,
             TodoContext dbContext,
+            //IClaimsSession session, 
             ILogger<AuthenticationController> logger)
         {
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -41,11 +43,12 @@ namespace Csci.EasyInventory.WebApi.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [HttpPost]
         [Route("api/[action]")]
-        public IActionResult Hello()
+        [AllowAnonymous]
+        public IActionResult Hello(string token)
         {
-            return Ok("Hello!");
+            return Ok("Hello!"+token);
         }
 
         /// <summary>
@@ -114,6 +117,7 @@ namespace Csci.EasyInventory.WebApi.Controllers
         /// <param name="token">刷新令牌</param>
         /// <returns></returns>
         [HttpPost]
+        [HttpGet]
         [Route("api/[action]")]
         [Authorize]
         [ProducesResponseType(typeof(Token), (int)HttpStatusCode.OK)]
@@ -132,39 +136,6 @@ namespace Csci.EasyInventory.WebApi.Controllers
             }
             return Ok(tk);
         }
-
-        /* 移除"当前登录部门/地盘"的概念，因为清查易的使用方式不像CDMS那样，用户经常性固定在某一个地盘
-        /// <summary>
-        /// 更换当前工作的地盘
-        /// </summary>
-        /// <param name="siteId"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("api/[action]")]
-        [Authorize]
-        public IActionResult ChangeWorkSite(int siteId)
-        {
-            var organ = dbContext.Organs.Find(siteId);
-            if (organ == null)
-                return NotFound();
-            try
-            {
-                authService.ChangeWorkSite(siteId);
-            }
-            catch (Exception ex)
-            {
-                //return Forbid();
-                logger.LogError(ex, ex.AllMessages());
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-            return Ok(new {
-                organ.Id,
-                organ.Code,
-                organ.Name,
-                organ.Type
-            });
-        }
-        */
 
         /// <summary>
         /// 验证令牌是否有效，有效则返回登录信息

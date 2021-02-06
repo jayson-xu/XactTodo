@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using XactTodo.Domain.AggregatesModel.MatterAggregate;
 
 namespace XactTodo.Api.Queries
 {
@@ -14,7 +15,7 @@ namespace XactTodo.Api.Queries
 
         Task<IEnumerable<UnfinishedMatterOutline>> GetUnfinishedMatterAsync(int userId);
 
-        //Task<IEnumerable<MatterSummary>> GetMattersAsync();
+        Task<PaginatedData<MatterOutline>> GetMattersAsync(string search, ProgressStatus? status, int page, int limit, string sortOrder);
 
         //Task<IEnumerable<CardType>> GetCardTypesAsync();
     }

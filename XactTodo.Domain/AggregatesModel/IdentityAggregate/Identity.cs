@@ -24,7 +24,7 @@ namespace XactTodo.Domain.AggregatesModel.IdentityAggregate
         /// </summary>
         [Required]
         [StringLength(User.MaxUserNameLength)]
-        public string UserName { get; set; }
+        public string Username { get; set; }
 
         /// <summary>
         /// 昵称

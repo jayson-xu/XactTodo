@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using XactTodo.Domain.SeedWork;
@@ -8,6 +9,7 @@ namespace XactTodo.Domain.AggregatesModel.MatterAggregate
     /// <summary>
     /// 表示一段时间的值对象
     /// </summary>
+    [Owned]
     public class PeriodOfTime: ValueObject
     {
         public decimal Num { get; set; }

@@ -14,6 +14,49 @@
             AuthenticationScheme 选项默认值
             </summary>
         </member>
+        <member name="M:XactTodo.Api.Controllers.MatterController.GetImportances">
+            <summary>
+            获取重要性列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:XactTodo.Api.Controllers.MatterController.GetTimeUnits">
+            <summary>
+            获取时间单位列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:XactTodo.Api.Controllers.MatterController.GetProgressStatuses">
+            <summary>
+            获取进展情况集合
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:XactTodo.Api.Controllers.MatterController.GetUnfinishedMatters(System.String)">
+            <summary>
+            获取未完成的事项
+            </summary>
+            <param name="excludedTeamsId">排除指定小组(例如私密)</param>
+            <returns></returns>
+        </member>
+        <member name="M:XactTodo.Api.Controllers.MatterController.GetById(System.Int32)">
+            <summary>
+            获取指定事项
+            </summary>
+            <param name="id">事项Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:XactTodo.Api.Controllers.MatterController.GetAll(System.String,System.Nullable{XactTodo.Domain.AggregatesModel.MatterAggregate.ProgressStatus},System.Int32,System.Int32,System.String)">
+            <summary>
+            获取全部事项
+            </summary>
+            <param name="search"></param>
+            <param name="status"></param>
+            <param name="page"></param>
+            <param name="limit"></param>
+            <param name="sortOrder"></param>
+            <returns></returns>
+        </member>
         <member name="M:XactTodo.Api.Controllers.MatterController.Create(XactTodo.Api.DTO.MatterInput)">
             <summary>
             创建新事项
@@ -35,6 +78,11 @@
             </summary>
             <param name="id"></param>
             <returns></returns>
+        </member>
+        <member name="M:XactTodo.Api.Controllers.MatterController.UpdateProgressStatus(System.Int32,XactTodo.Api.DTO.ProgressUpdateAsk)">
+            <summary>
+            更新事项进展状况
+            </summary>
         </member>
         <member name="M:XactTodo.Api.Controllers.TeamController.GetJoinedTeams">
             <summary>
@@ -90,7 +138,7 @@
             用户ID
             </summary>
         </member>
-        <member name="P:XactTodo.Api.DTO.LoginResult.UserName">
+        <member name="P:XactTodo.Api.DTO.LoginResult.Username">
             <summary>
             用户账号
             </summary>
@@ -223,9 +271,9 @@
             最后期限
             </summary>
         </member>
-        <member name="P:XactTodo.Api.DTO.MatterInput.Finished">
+        <member name="P:XactTodo.Api.DTO.MatterInput.StartTime">
             <summary>
-            已完成
+            开始时间
             </summary>
         </member>
         <member name="P:XactTodo.Api.DTO.MatterInput.FinishTime">
@@ -258,6 +306,31 @@
             所属小组，此属性值为null时表示归属个人
             </summary>
         </member>
+        <member name="T:XactTodo.Api.DTO.ProgressUpdateAsk">
+            <summary>
+            更新事项进展状况的请求
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.DTO.ProgressUpdateAsk.NewStatus">
+            <summary>
+            最新进展状况<seealso cref="T:XactTodo.Domain.AggregatesModel.MatterAggregate.ProgressStatus"/>
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.DTO.ProgressUpdateAsk.Comment">
+            <summary>
+            进展说明
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.DTO.ProgressUpdateAsk.StartTime">
+            <summary>
+            事项开始时间
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.DTO.ProgressUpdateAsk.FinishTime">
+            <summary>
+            事项完成时间
+            </summary>
+        </member>
         <member name="P:XactTodo.Api.DTO.TeamInput.Id">
             <summary>
             主键
@@ -273,15 +346,37 @@
             组内提议使用的Tags(多个Tag之间以;号分隔)
             </summary>
         </member>
-        <member name="T:XactTodo.Api.Infrastructure.TodoContextSeed">
+        <member name="P:XactTodo.Api.DTO.UserInput.Username">
             <summary>
-            EF Core中并没有Seed方法，这里实现相似的功能
+            账号
             </summary>
         </member>
-        <member name="M:XactTodo.Api.Infrastructure.TodoContextSeed.SeedAsync(XactTodo.Infrastructure.TodoContext,System.IServiceProvider,Microsoft.Extensions.Logging.ILogger{XactTodo.Api.Infrastructure.TodoContextSeed})">
+        <member name="P:XactTodo.Api.DTO.UserInput.Password">
             <summary>
-            初始化数据
+            登录密码
             </summary>
+        </member>
+        <member name="T:XactTodo.Api.Filters.HttpGlobalExceptionFilter">
+            <summary>
+            全局异常捕获及处理
+            </summary>
+        </member>
+        <member name="M:XactTodo.Api.Filters.HttpGlobalExceptionFilter.OnException(Microsoft.AspNetCore.Mvc.Filters.ExceptionContext)">
+            <summary>
+            截获异常
+            </summary>
+            <param name="context">异常上下文</param>
+        </member>
+        <member name="T:XactTodo.Api.Filters.HttpGlobalExceptionFilter.InternalServerErrorObjectResult">
+            <summary>
+            表示发生服务器内部异常的结果类
+            </summary>
+        </member>
+        <member name="M:XactTodo.Api.Filters.HttpGlobalExceptionFilter.InternalServerErrorObjectResult.#ctor(System.Object)">
+            <summary>
+            构造函数
+            </summary>
+            <param name="value">包含异常内容的对象</param>
         </member>
         <member name="T:XactTodo.Api.Queries.IMatterQueries">
             <summary>
@@ -325,6 +420,17 @@
             获取指定小组内全部成员
             </summary>
             <param name="teamId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XactTodo.Api.Queries.MatterQueries.GetMattersAsync(System.String,System.Nullable{XactTodo.Domain.AggregatesModel.MatterAggregate.ProgressStatus},System.Int32,System.Int32,System.String)">
+            <summary>
+            查询全部事项
+            </summary>
+            <param name="search">搜索关键字</param>
+            <param name="status">进展情况</param>
+            <param name="page">第几页，从1开始</param>
+            <param name="limit">每页限定行数</param>
+            <param name="sortOrder">排序字段，格式如：column1[, column2 [DESC]]</param>
             <returns></returns>
         </member>
         <member name="T:XactTodo.Api.Queries.Matter">
@@ -439,7 +545,12 @@
         </member>
         <member name="T:XactTodo.Api.Queries.MatterOutline">
             <summary>
-            事项
+            事项概略
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Queries.MatterOutline.Id">
+            <summary>
+            主键
             </summary>
         </member>
         <member name="P:XactTodo.Api.Queries.MatterOutline.Subject">
@@ -447,19 +558,29 @@
             主题
             </summary>
         </member>
+        <member name="P:XactTodo.Api.Queries.MatterOutline.Content">
+            <summary>
+            具体内容
+            </summary>
+        </member>
         <member name="P:XactTodo.Api.Queries.MatterOutline.Importance">
             <summary>
             重要性
             </summary>
         </member>
+        <member name="P:XactTodo.Api.Queries.MatterOutline.Status">
+            <summary>
+            进展情况
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Queries.MatterOutline.ProgressStatus">
+            <summary>
+            进展情况描述
+            </summary>
+        </member>
         <member name="P:XactTodo.Api.Queries.MatterOutline.Deadline">
             <summary>
             最后期限
-            </summary>
-        </member>
-        <member name="P:XactTodo.Api.Queries.MatterOutline.Finished">
-            <summary>
-            已完成
             </summary>
         </member>
         <member name="P:XactTodo.Api.Queries.MatterOutline.FinishTime">
@@ -512,6 +633,73 @@
             所属小组
             </summary>
         </member>
+        <member name="T:XactTodo.Api.Queries.PaginatedData`1">
+            <summary>
+            分页数据
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="P:XactTodo.Api.Queries.PaginatedData`1.PageIndex">
+            <summary>
+            第几页，从1开始
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Queries.PaginatedData`1.TotalPages">
+            <summary>
+            总页数
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Queries.PaginatedData`1.Total">
+            <summary>
+            记录总数
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Queries.PaginatedData`1.Rows">
+            <summary>
+            本次返回的数据行
+            </summary>
+        </member>
+        <member name="M:XactTodo.Api.Queries.PaginatedData`1.#ctor(System.Collections.Generic.IEnumerable{`0},System.Int32,System.Int32,System.Int32)">
+            <summary>
+            构造函数
+            </summary>
+            <param name="items">数据行</param>
+            <param name="count">记录总数</param>
+            <param name="pageIndex">第几页，从1开始</param>
+            <param name="pageSize">每页记录数</param>
+        </member>
+        <member name="P:XactTodo.Api.Queries.PaginatedData`1.HasPreviousPage">
+            <summary>
+            是否有上页
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Queries.PaginatedData`1.HasNextPage">
+            <summary>
+            是否有下页
+            </summary>
+        </member>
+        <member name="M:XactTodo.Api.Queries.PaginatedData`1.ExecuteAsync(System.Linq.IQueryable{`0},System.Int32,System.Int32)">
+            <summary>
+            执行查询并返回指定页的数据
+            </summary>
+            <param name="query">查询</param>
+            <param name="pageIndex">第几页，从1开始</param>
+            <param name="pageSize">每页数据行</param>
+            <returns></returns>
+        </member>
+        <member name="M:XactTodo.Api.Queries.PaginatedData`1.ExecuteAsync(System.Data.IDbConnection,System.String,System.Object,System.String,System.Int32,System.Int32,System.Data.IDbTransaction)">
+            <summary>
+            异步执行分页查询
+            </summary>
+            <param name="connection">数据库连接</param>
+            <param name="selectScript">SELECT脚本，可包含<code>WHERE</code>但不能包含<code>ORDER BY子句</code></param>
+            <param name="param">查询参数对象</param>
+            <param name="orderBy">排序字段，格式如：column1[, column2 [DESC]]</param>
+            <param name="pageIndex">第几页，从1开始</param>
+            <param name="pageSize">每页记录数</param>
+            <param name="transaction">数据库事务对象</param>
+            <returns></returns>
+        </member>
         <member name="P:XactTodo.Api.Queries.TeamOutline.Id">
             <summary>
             主键
@@ -532,9 +720,29 @@
             组员
             </summary>
         </member>
+        <member name="P:XactTodo.Api.Queries.User.Username">
+            <summary>
+            账号
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Queries.User.CreatorName">
+            <summary>
+            创建者名字
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Queries.User.CreationTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
         <member name="M:XactTodo.Api.Startup.RegisterServiceTypes(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
             自动注册Domain项目中的所有Service类
+            </summary>
+        </member>
+        <member name="M:XactTodo.Api.Startup.RegisterQueries(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            自动注册Domain项目中的所有实现IQueries接口的类
             </summary>
         </member>
         <member name="M:XactTodo.Api.Startup.RegisterRepositoryTypes(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
@@ -572,6 +780,56 @@
             </summary>
             <param name="exception"></param>
             <returns></returns>
+        </member>
+        <member name="T:XactTodo.Api.Utils.JsonErrorResponse">
+            <summary>
+            错误响应
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Utils.JsonErrorResponse.Message">
+            <summary>
+            错误消息
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Utils.JsonErrorResponse.DevelopmentMessage">
+            <summary>
+            开发环境的消息
+            </summary>
+        </member>
+        <member name="M:XactTodo.Api.Utils.JsonErrorResponse.#ctor">
+            <summary>
+            缺省构造函数
+            </summary>
+        </member>
+        <member name="M:XactTodo.Api.Utils.JsonErrorResponse.#ctor(System.String,System.String)">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:XactTodo.Api.Utils.ValueTextPair`1">
+            <summary>
+            值-文本对
+            </summary>
+        </member>
+        <member name="M:XactTodo.Api.Utils.ValueTextPair`1.#ctor(`0,System.String)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Utils.ValueTextPair`1.Value">
+            <summary>
+            值
+            </summary>
+        </member>
+        <member name="P:XactTodo.Api.Utils.ValueTextPair`1.Text">
+            <summary>
+            文本
+            </summary>
+        </member>
+        <member name="M:XactTodo.Api.Utils.ValueTextPair`1.ToString">
+            <summary>
+            
+            </summary>
         </member>
         <member name="T:Csci.EasyInventory.WebApi.Controllers.AuthenticationController">
             <summary>

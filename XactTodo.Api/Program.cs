@@ -13,6 +13,7 @@ using XactTodo.Api.Extensions;
 using XactTodo.Api.Infrastructure;
 using XactTodo.Infrastructure;
 using NLog.Web;
+using Microsoft.Extensions.Hosting;
 
 namespace XactTodo.Api
 {
@@ -20,24 +21,23 @@ namespace XactTodo.Api
     {
         public static void Main(string[] args)
         {
-            var i = typeof(Domain.AggregatesModel.TeamAggregate.Member).GetInterface(nameof(Domain.SeedWork.ISoftDelete));
-            NLog.LogManager.LoadConfiguration("nlog.config");
-            CreateWebHostBuilder(args).Build()
-                .MigrateDbContext<TodoContext>((context, services) =>
-                {
-                    //var env = services.GetService<IHostingEnvironment>();
-                    //var settings = services.GetService<IOptions<TodoSettings>>();
-                    var logger = services.GetService<ILogger<TodoContextSeed>>();
-
-                    new TodoContextSeed()
-                        .SeedAsync(context, services, logger)
-                        .Wait();
-                })
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.WriteLine($"AppContext.BaseDirectory:{AppContext.BaseDirectory}");
+            NLog.LogManager.LoadConfiguration("NLog.config"); //注意大小写一致，Linux下文件名是区分大小写的
+            CreateHostBuilder(args)
+                .Build()
+                .MigrateDatabase<TodoContext>()
                 .Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>().UseNLog();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 1024 * 1024 * 50);
+                    webBuilder
+                        .UseStartup<Startup>()
+                        .UseNLog(); //使用NLog记录日志
+                });
     }
 }

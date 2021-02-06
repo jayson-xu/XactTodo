@@ -55,7 +55,7 @@ namespace XactTodo.Domain
             var identity = new Identity
             {
                 UserId = user.Id,
-                UserName = user.UserName,
+                Username = user.UserName,
                 Nickname = user.DisplayName,
                 AccessToken = token.AccessToken,
                 RefreshToken = token.RefreshToken,
@@ -98,7 +98,7 @@ namespace XactTodo.Domain
             var identity = new Identity
             {
                 UserId = existed.UserId,
-                UserName = existed.UserName,
+                Username = existed.Username,
                 Nickname = existed.Nickname,
                 AccessToken = token.AccessToken,
                 RefreshToken = token.RefreshToken,

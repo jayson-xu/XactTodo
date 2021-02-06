@@ -31,7 +31,7 @@ namespace XactTodo.Api.DTO
         /// <summary>
         /// 用户账号
         /// </summary>
-        public string UserName { get; set; }
+        public string Username { get; set; }
 
         /// <summary>
         /// 昵称
@@ -64,7 +64,7 @@ namespace XactTodo.Api.DTO
             var result = new LoginResult(LoginResultType.Success)
             {
                 UserId = identity.UserId,
-                UserName = identity.UserName,
+                Username = identity.Username,
                 Nickname = identity.Nickname,
                 Token = new Token(identity.AccessToken, identity.RefreshToken, identity.ExpiresIn)
             };

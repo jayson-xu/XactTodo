@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using XactTodo.Domain.AggregatesModel.IdentityAggregate;
-using XactTodo.Domain.AggregatesModel.IdentityAggregate;
 using XactTodo.Domain.SeedWork;
 
 namespace XactTodo.Infrastructure.Repositories

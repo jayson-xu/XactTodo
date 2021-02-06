@@ -1,26 +1,30 @@
-﻿using MySql.Data.MySqlClient;
+﻿using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using System.Data.Common;
+using Microsoft.Extensions.Configuration;
+using XactTodo.Security.Session;
 
 namespace XactTodo.Api.Queries
 {
     public class TeamQueries : ITeamQueries
     {
-        private string _connectionString = string.Empty;
+        private readonly IClaimsSession session;
+        private readonly string connectionString;
 
-        public TeamQueries(string constr)
+        public TeamQueries(IConfiguration configuration, IClaimsSession session)
         {
-            _connectionString = !string.IsNullOrWhiteSpace(constr) ? constr : throw new ArgumentNullException(nameof(constr));
+            this.session = session ?? throw new ArgumentNullException(nameof(session));
+            this.connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("miss configuration item: [DefaultConnection]");
         }
 
         public async Task<Team> GetAsync(int id)
         {
             const string sql = @"SELECT Id, Name, ProposedTags FROM Team WHERE IsDeleted=0 AND Id=@id";
-            using (var connection = new MySqlConnection(_connectionString))
+            using (var connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
@@ -62,7 +66,7 @@ namespace XactTodo.Api.Queries
         private async Task<IEnumerable<TeamOutline>> QueryTeams(string whereClause, object param)
         {
             string sql = @"SELECT Id, Name, ProposedTags FROM Team WHERE IsDeleted=0 AND "+whereClause;
-            using (var connection = new MySqlConnection(_connectionString))
+            using (var connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
@@ -84,7 +88,7 @@ namespace XactTodo.Api.Queries
 
         public async Task<IEnumerable<MemberOutline>> GetMembersAsync(int teamId)
         {
-            using (var connection = new MySqlConnection(_connectionString))
+            using (var connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
                 return await QueryMembersAsync(teamId, connection);

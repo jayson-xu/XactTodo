@@ -30,7 +30,6 @@ namespace XactTodo.Api.Authentication
             )
             : base(options, logger, encoder, clock)
         {
-            var type = typeof(Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerHandler);
             this.httpContextAccessor = httpContextAccessor;
             this.authService = authService;
         }
@@ -72,7 +71,7 @@ namespace XactTodo.Api.Authentication
             }
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Name, identity.UserName),
+                new Claim(ClaimTypes.Name, identity.Username),
                 new Claim(ClaimTypes.NameIdentifier, identity.UserId.ToString()),
                 new Claim(Security.ClaimTypes.AccessToken, identity.AccessToken) 
             };
@@ -97,7 +96,7 @@ namespace XactTodo.Api.Authentication
             validatedContext.Success();
             httpContextAccessor.HttpContext.User = principal;
             var result = validatedContext.Result;
-            this.Logger.LogDebug(accessToken + " is valid! user name: "+identity.UserName);
+            this.Logger.LogDebug(accessToken + " is valid! user name: "+identity.Username);
             return result;
             //foreach (var validator in Options.SecurityTokenValidators)
         }
